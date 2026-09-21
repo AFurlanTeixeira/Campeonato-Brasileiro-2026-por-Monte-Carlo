@@ -1,0 +1,118 @@
+# =============================================================================
+# BOAS PRÁTICAS
+# - Ignorar arquivos gerados, não arquivos fonte
+# - Manter dados brutos (data/raw/) versionados; ignorar apenas artefatos gerados
+# - Organizar por categoria para facilitar manutenção
+# =============================================================================
+
+
+# =============================================================================
+# SISTEMA OPERACIONAL — macOS
+# =============================================================================
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+
+# =============================================================================
+# SISTEMA OPERACIONAL — Windows
+# =============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+# =============================================================================
+# SISTEMA OPERACIONAL — Linux
+# =============================================================================
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+
+# =============================================================================
+# IDEs — VS Code
+# =============================================================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.code-workspace
+
+
+# =============================================================================
+# IDEs — JetBrains (IntelliJ, PyCharm, etc.)
+# =============================================================================
+.idea/
+*.iws
+*.iml
+
+
+# =============================================================================
+# IDEs — Cursor
+# =============================================================================
+.cursor/rules
+.cursorignore
+
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+.python-version
+*.egg-info/
+build/
+dist/
+
+# Testes e cobertura
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter (caso o grupo use notebooks para explorar o modelo)
+.ipynb_checkpoints/
+
+
+# =============================================================================
+# VARIÁVEIS DE AMBIENTE
+# Manter arquivos .example commitados como referência
+# =============================================================================
+.env
+.env.*
+!.env.example
+
+
+# =============================================================================
+# DADOS E RESULTADOS GERADOS
+# data/raw/ é versionado (dataset original do enunciado); apenas os artefatos
+# derivados da simulação (tabelas agregadas, figuras) ficam fora do git.
+# =============================================================================
+data/processed/*
+!data/processed/.gitkeep
+*.png
+!docs/**/*.png
+
+
+# =============================================================================
+# LOGS E TEMPORÁRIOS
+# =============================================================================
+*.log
+.cache/
+.tmp/

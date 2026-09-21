@@ -1,92 +1,122 @@
-# 🏆 Predição do Campeonato Brasileiro 2026 por Monte Carlo
+# me524-lab1-brasileirao
 
-### 📌 Sobre o Projeto
+Predição do Campeonato Brasileiro 2026 por métodos de Monte Carlo — Laboratório 1 de ME524 (Unicamp, 2026). A partir dos jogos já disputados, estima a força de ataque/defesa de cada time, simula os jogos pendentes segundo um modelo Poisson e usa as simulações para estimar probabilidades de título, rebaixamento e desempate.
 
-Laboratório 1 da disciplina **ME524 - Computação Aplicada à Estatística** (Unicamp, 2026). O objetivo é usar métodos de **Monte Carlo** para simular os jogos ainda não realizados do Campeonato Brasileiro 2026 e estimar probabilidades de eventos como título, rebaixamento e desempate.
+## Objetivos / Perguntas a Responder
 
-- **Disciplina:** ME524
-- **Entrega:** relatório em grupo (3 a 4 integrantes), com código e texto explicativo
+* Qual a probabilidade de cada time ser campeão, e de ser rebaixado?
+* Qual a probabilidade do campeonato ser decidido pelos critérios de desempate?
+* Qual o valor esperado de pontos do campeão?
+* Quantos pontos garantem ≥90% de chance de título, ou ≥95% de chance de escapar do rebaixamento?
+* Qual a variabilidade (via bootstrap) das estimativas de força de cada time?
 
----
+Lista completa em [`docs/enunciado.md`](docs/enunciado.md).
 
-### 📄 Arquivos e Modelos
-
-#### 1. Dados
-- `brasileirao_2026.csv`:
-    - Base com todos os 380 jogos do campeonato (20 times, 38 rodadas).
-    - Colunas: `rodada`, `time_mandante`, `gols_mandante`, `time_visitante`, `gols_visitante`.
-    - Jogos ainda não realizados ficam com os gols em branco — são o que precisa ser simulado.
-
-#### 2. Enunciado
-- `lab1.pdf`:
-    - Descrição completa do modelo, roteiro sugerido e perguntas a responder.
-
----
-
-### 🧮 Modelo Proposto
-
-Para um jogo entre mandante `m` e visitante `v`, o número de gols de cada time é modelado como Poisson:
+## Arquitetura
 
 ```
-X_m ~ Poisson((θ_m + ϕ_v) / 2)
-X_v ~ Poisson((θ_v + ϕ_m) / 2)
+data/raw/brasileirao_2026.csv
+        │
+        ▼
+ estimar θ/ϕ por time (jogos disputados)
+        │
+        ▼
+ simular jogos pendentes (Poisson) ──── repetir N vezes (Monte Carlo)
+        │
+        ▼
+ calcular classificação de cada simulação
+        │
+        ▼
+ agregar → probabilidades por time + bootstrap (IC de θ/ϕ)
 ```
 
-- `θ` (theta): taxa de gols **marcados** pelo time — média de gols marcados por jogo, considerando os jogos já disputados.
-- `ϕ` (phi): taxa de gols **sofridos** pelo time — média de gols sofridos por jogo, considerando os jogos já disputados.
-
-Critérios de desempate na classificação (nesta ordem): número de vitórias → saldo de gols → gols marcados.
+Detalhes das decisões do modelo em [`.ai/modelagem.md`](.ai/modelagem.md).
 
 ---
 
-### 🔍 Profiling do Dataset
+## Configuração do Projeto
 
-- **Total de jogos:** 380 (20 times × 38 rodadas).
-- **Jogos disputados:** 277, cobrindo integralmente da rodada 1 até a rodada 28.
-- **Jogos pendentes (a simular):** 103, com a primeira ocorrência na rodada 21 (pendências intercaladas até a rodada 38).
-- **Gols marcados nos jogos disputados:** 739.
-- **Valores nulos:** apenas em `gols_mandante`/`gols_visitante` dos jogos ainda não realizados.
+### Pré-requisitos
 
----
+| Ferramenta | Versão mínima |
+|-----------|--------------|
+| Python | 3.11 |
 
-### 🎯 Perguntas a Responder
+### Instalação
 
-1. Qual a probabilidade de cada time ser campeão?
-2. Qual a probabilidade de cada time ser rebaixado?
-3. Qual a probabilidade do campeonato ser decidido pelos critérios de desempate?
-4. Qual o valor esperado do número de pontos do campeão?
-5. Quantos pontos uma equipe precisa fazer para ter pelo menos 90% de chance de ser campeã?
-6. Quantos pontos são necessários para uma equipe ter pelo menos 95% de chance de não ser rebaixada?
+```bash
+python -m venv .venv
+source .venv/bin/activate         # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+```
 
-Além disso, o laboratório pede:
-- Intervalos de confiança via **bootstrap** para as estimativas de θ e ϕ de cada time.
-- Uma **atividade extra**: propor e justificar uma melhoria no modelo (ex.: vantagem de mandante, θ/ϕ variando ao longo do campeonato), comparando os resultados com o modelo original.
+### Variáveis de Ambiente (opcional)
 
----
+```bash
+cp .env.example .env
+# Edite .env se quiser fixar N_SIMULACOES / RANDOM_SEED / DATA_PATH
+```
 
-### 🧪 Roteiro de Execução
-
-1. Estimar θ e ϕ para cada time a partir dos jogos já disputados.
-2. Criar uma função que calcule a classificação completa do campeonato (pontos, vitórias, saldo de gols) a partir de uma tabela de resultados.
-3. Simular os jogos pendentes (rodadas 21–38) segundo o modelo Poisson proposto.
-4. Repetir a simulação N vezes (Monte Carlo) e registrar as métricas necessárias para responder às perguntas.
-5. Calcular intervalos de confiança via bootstrap para θ e ϕ.
-6. Implementar e comparar a melhoria proposta na atividade extra.
+Consulte [`.env.example`](.env.example) para a lista completa.
 
 ---
 
-### ✅ Checklist de Entregas
+## Rodando localmente
 
-[ ] Estimação de θ e ϕ por time
+```bash
+python scripts/run_simulation.py --n-simulacoes 10000 --seed 42
+```
 
-[ ] Função de cálculo da classificação (com critérios de desempate)
+### Testes
 
-[ ] Simulação Monte Carlo dos jogos pendentes
+```bash
+pytest              # ver pyproject.toml para configuração de cobertura
+```
 
-[ ] Respostas às 6 perguntas do enunciado
+---
 
-[ ] Intervalos de confiança via bootstrap + gráfico
+## Dados
 
-[ ] Atividade extra (melhoria do modelo, justificada e comparada)
+O dataset [`data/raw/brasileirao_2026.csv`](data/raw/brasileirao_2026.csv) tem os 380 jogos do campeonato (20 times, 38 rodadas). 278 jogos já disputados (rodadas 1–20 completas); 102 pendentes (a partir da rodada 21), com os gols em branco — são o que a simulação precisa preencher.
 
-[ ] Relatório final com código e texto explicativo
+---
+
+## Estrutura de Pastas
+
+```
+data/
+  raw/                     # Dataset original do enunciado (versionado, não editar)
+  processed/               # Artefatos gerados pela simulação (fora do git)
+docs/
+  enunciado.md             # Resumo do enunciado e das perguntas
+  respostas.md             # Esqueleto para registrar as respostas do grupo
+  lab1.pdf                 # Enunciado completo (adicionar aqui)
+scripts/
+  run_simulation.py        # CLI que roda a simulação Monte Carlo completa
+src/
+  brasileirao_mc/          # Pacote principal
+    dados.py               # Carregamento e filtros do CSV (implementado)
+    estimativas.py         # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
+    simulacao.py           # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
+    classificacao.py       # Cálculo da tabela de classificação (implementado)
+    bootstrap.py           # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
+tests/
+  unit/                    # Testes unitários (pytest)
+```
+
+## Contexto para IAs
+
+A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso com ferramentas de IA (Claude Code, Cursor, Copilot, etc.):
+
+| Arquivo | Descrição |
+|---------|-----------|
+| [.ai/contexto.md](.ai/contexto.md) | Visão geral: stack, fluxo principal e índice dos demais arquivos |
+| [.ai/padroes-codigo.md](.ai/padroes-codigo.md) | Padrões Python e de testes usados no projeto |
+| [.ai/modelagem.md](.ai/modelagem.md) | Decisões do modelo estatístico dadas pelo enunciado |
+
+## Documentação
+
+| Arquivo | Descrição |
+|---------|-----------|
+| [docs/enunciado.md](docs/enunciado.md) | Resumo do enunciado e das perguntas a responder |
+| [docs/respostas.md](docs/respostas.md) | Esqueleto para o relatório final do grupo |
