@@ -1,18 +1,49 @@
-# me524-lab1-brasileirao
+# 🏆 Predição do Campeonato Brasileiro 2026 por Monte Carlo
+ 
+### 📌 Sobre o Projeto
+ 
+Laboratório 1 da disciplina **ME524 - Computação Aplicada à Estatística** (Unicamp, 2026). O objetivo é usar métodos de **Monte Carlo** para simular os jogos ainda não realizados do Campeonato Brasileiro 2026 e estimar probabilidades de eventos como título, rebaixamento e desempate.
+ 
+- **Disciplina:** ME524
+- **Entrega:** relatório em grupo (3 a 4 integrantes), com código e texto explicativo
 
-Predição do Campeonato Brasileiro 2026 por métodos de Monte Carlo — Laboratório 1 de ME524 (Unicamp, 2026). A partir dos jogos já disputados, estima a força de ataque/defesa de cada time, simula os jogos pendentes segundo um modelo Poisson e usa as simulações para estimar probabilidades de título, rebaixamento e desempate.
+---
 
-## Objetivos / Perguntas a Responder
+### 📄 Dados
+- `brasileirao_2026.csv`:
+    - Base com todos os 380 jogos do campeonato (20 times, 38 rodadas).
+    - Colunas: `rodada`, `time_mandante`, `gols_mandante`, `time_visitante`, `gols_visitante`.
+    - Jogos ainda não realizados ficam com os gols em branco — são o que precisa ser simulado.
 
-* Qual a probabilidade de cada time ser campeão, e de ser rebaixado?
-* Qual a probabilidade do campeonato ser decidido pelos critérios de desempate?
-* Qual o valor esperado de pontos do campeão?
-* Quantos pontos garantem ≥90% de chance de título, ou ≥95% de chance de escapar do rebaixamento?
-* Qual a variabilidade (via bootstrap) das estimativas de força de cada time?
+---
 
-Lista completa em [`docs/enunciado.md`](docs/enunciado.md).
+### 🎯 Perguntas a Responder
 
-## Arquitetura
+1. Qual a probabilidade de cada time ser campeão?
+2. Qual a probabilidade de cada time ser rebaixado?
+3. Qual a probabilidade do campeonato ser decidido pelos critérios de desempate?
+4. Qual o valor esperado do número de pontos do campeão?
+5. Quantos pontos uma equipe precisa fazer para ter pelo menos 90% de chance de ser campeã?
+6. Quantos pontos são necessários para uma equipe ter pelo menos 95% de chance de não ser rebaixada?
+Além disso, o laboratório pede:
+- Intervalos de confiança via **bootstrap** para as estimativas de θ e ϕ de cada time.
+- Uma **atividade extra**: propor e justificar uma melhoria no modelo (ex.: vantagem de mandante, θ/ϕ variando ao longo do campeonato), comparando os resultados com o modelo original.
+
+---
+
+## 🔍 Profiling do Dataset
+
+O dataset [`data/raw/brasileirao_2026.csv`](data/raw/brasileirao_2026.csv) 
+- **Total de jogos:** 380 (20 times × 38 rodadas).
+- **Jogos disputados:** 278, cobrindo integralmente da rodada 1 até a rodada 20.
+- **Jogos pendentes (a simular):** 102, com a primeira ocorrência na rodada 21 (pendências intercaladas até a rodada 38).
+- **Gols marcados nos jogos disputados:** 742.
+- **Valores nulos:** apenas em `gols_mandante`/`gols_visitante` dos jogos ainda não realizados.
+
+---
+
+
+## 🧮 Modelo Proposto e Arquitetura
 
 ```
 data/raw/brasileirao_2026.csv
@@ -74,12 +105,6 @@ testthat::test_dir("tests/testthat")   # ou: devtools::test()
 
 ---
 
-## Dados
-
-O dataset [`data/raw/brasileirao_2026.csv`](data/raw/brasileirao_2026.csv) tem os 380 jogos do campeonato (20 times, 38 rodadas). 278 jogos já disputados (rodadas 1–20 completas); 102 pendentes (a partir da rodada 21), com os gols em branco — são o que a simulação precisa preencher.
-
----
-
 ## Estrutura de Pastas
 
 ```
@@ -119,3 +144,33 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
 |---------|-----------|
 | [docs/enunciado.md](docs/enunciado.md) | Resumo do enunciado e das perguntas a responder |
 | [docs/respostas.md](docs/respostas.md) | Esqueleto para o relatório final do grupo |
+
+---
+
+### 🧪 Roteiro de Execução
+ 
+1. Estimar θ e ϕ para cada time a partir dos jogos já disputados.
+2. Criar uma função que calcule a classificação completa do campeonato (pontos, vitórias, saldo de gols) a partir de uma tabela de resultados.
+3. Simular os jogos pendentes (rodadas 21–38) segundo o modelo Poisson proposto.
+4. Repetir a simulação N vezes (Monte Carlo) e registrar as métricas necessárias para responder às perguntas.
+5. Calcular intervalos de confiança via bootstrap para θ e ϕ.
+6. Implementar e comparar a melhoria proposta na atividade extra.
+---
+ 
+### ✅ Checklist de Entregas
+ 
+[ ] Estimação de θ e ϕ por time
+
+[ ] Função de cálculo da classificação (com critérios de desempate)
+
+[ ] Simulação Monte Carlo dos jogos pendentes
+
+[ ] Respostas às 6 perguntas do enunciado
+
+[ ] Intervalos de confiança via bootstrap + gráfico
+
+[ ] Atividade extra (melhoria do modelo, justificada e comparada)
+
+[ ] Relatório final com código e texto explicativo
+ 
+
