@@ -78,9 +78,15 @@ Além disso, o laboratório pede:
 ### ✅ Checklist de Entregas
 
 [ ] Estimação de θ e ϕ por time
+
 [ ] Função de cálculo da classificação (com critérios de desempate)
+
 [ ] Simulação Monte Carlo dos jogos pendentes
+
 [ ] Respostas às 6 perguntas do enunciado
+
 [ ] Intervalos de confiança via bootstrap + gráfico
+
 [ ] Atividade extra (melhoria do modelo, justificada e comparada)
+
 [ ] Relatório final com código e texto explicativo
