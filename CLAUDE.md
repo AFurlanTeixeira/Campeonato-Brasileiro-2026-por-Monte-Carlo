@@ -17,23 +17,22 @@ perguntas do enunciado.
 
 Docs mais profundos:
 - `.ai/contexto.md` — visão geral do fluxo e índice dos demais arquivos
-- `.ai/padroes-codigo.md` — padrões Python e de testes usados no projeto
+- `.ai/padroes-codigo.md` — padrões R e de testes usados no projeto
 - `.ai/modelagem.md` — decisões do modelo estatístico dadas pelo enunciado (não a "atividade extra" — essa fica em aberto para o grupo decidir)
 - `docs/enunciado.md` — resumo do enunciado e das perguntas a responder
 
 ## Commands
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
+Rscript -e 'install.packages("renv"); renv::restore()'
 
-pytest                                     # testes unitários (ver pyproject.toml)
-python scripts/run_simulation.py           # roda a simulação Monte Carlo completa
+Rscript -e 'testthat::test_dir("tests/testthat")'   # testes unitários (ver DESCRIPTION)
+Rscript scripts/run_simulation.R                    # roda a simulação Monte Carlo completa
 ```
 
 Rodar um único arquivo de teste:
 ```bash
-pytest tests/unit/test_classificacao.py
+Rscript -e 'testthat::test_file("tests/testthat/test-classificacao.R")'
 ```
 
 ## Architecture
@@ -42,33 +41,33 @@ pytest tests/unit/test_classificacao.py
 
 ```
 data/raw/brasileirao_2026.csv
-  → src/brasileirao_mc/dados.py            (carrega e valida os jogos)
-  → src/brasileirao_mc/estimativas.py      (estima θ/ϕ por time, jogos já disputados)
-  → src/brasileirao_mc/simulacao.py        (simula os jogos pendentes via Poisson, N vezes)
-  → src/brasileirao_mc/classificacao.py    (calcula a tabela final de cada simulação)
+  → R/dados.R            (carrega e valida os jogos)
+  → R/estimativas.R      (estima θ/ϕ por time, jogos já disputados)
+  → R/simulacao.R        (simula os jogos pendentes via Poisson, N vezes)
+  → R/classificacao.R    (calcula a tabela final de cada simulação)
   → agrega resultados das N simulações → probabilidades por time
-  → src/brasileirao_mc/bootstrap.py        (IC para θ/ϕ via reamostragem com reposição)
+  → R/bootstrap.R        (IC para θ/ϕ via reamostragem com reposição)
 ```
 
 ### Módulos
 
-1. **`dados.py`**: leitura do CSV, sem transformação de negócio — só tipagem e
+1. **`dados.R`**: leitura do CSV, sem transformação de negócio — só tipagem e
    validação básica (colunas esperadas, tipos).
-2. **`estimativas.py`**: estimadores de θ e ϕ por time a partir dos jogos já
+2. **`estimativas.R`**: estimadores de θ e ϕ por time a partir dos jogos já
    disputados (média de gols marcados / sofridos por jogo).
-3. **`simulacao.py`**: simulação de um jogo (Poisson) e de uma temporada
+3. **`simulacao.R`**: simulação de um jogo (Poisson) e de uma temporada
    inteira (todos os jogos pendentes, repetido N vezes).
-4. **`classificacao.py`**: cálculo da tabela de classificação a partir de uma
+4. **`classificacao.R`**: cálculo da tabela de classificação a partir de uma
    tabela de resultados, aplicando os critérios de desempate do enunciado
    (vitórias → saldo de gols → gols marcados). Já implementado — é utilitário
    puro de ranking, independente do modelo estatístico.
-5. **`bootstrap.py`**: intervalos de confiança para θ/ϕ via bootstrap.
+5. **`bootstrap.R`**: intervalos de confiança para θ/ϕ via bootstrap.
 
 ### O que está implementado vs. pendente
 
-`dados.py` e `classificacao.py` têm implementação completa (são utilitários
-mecânicos, não a parte avaliada do laboratório). `estimativas.py`,
-`simulacao.py` e `bootstrap.py` estão como esqueleto (assinatura + docstring
+`dados.R` e `classificacao.R` têm implementação completa (são utilitários
+mecânicos, não a parte avaliada do laboratório). `estimativas.R`,
+`simulacao.R` e `bootstrap.R` estão como esqueleto (assinatura + roxygen2
 + `TODO`) — são o núcleo estatístico que o grupo precisa implementar e que é
 avaliado no laboratório.
 

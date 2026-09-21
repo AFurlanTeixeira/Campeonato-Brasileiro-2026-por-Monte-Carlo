@@ -1,0 +1,17 @@
+Package: brasileirao.mc
+Title: Predicao do Campeonato Brasileiro 2026 por Monte Carlo
+Version: 0.1.0
+Description: Estima a forca de ataque/defesa de cada time a partir dos jogos
+    ja disputados do Campeonato Brasileiro 2026, simula os jogos pendentes
+    via um modelo Poisson e usa as simulacoes para estimar probabilidades de
+    titulo, rebaixamento e desempate. Laboratorio 1 de ME524 (Unicamp, 2026).
+License: MIT
+Encoding: UTF-8
+Imports:
+    dplyr,
+    ggplot2,
+    optparse
+Suggests:
+    testthat (>= 3.0.0),
+    covr
+Config/testthat/edition: 3

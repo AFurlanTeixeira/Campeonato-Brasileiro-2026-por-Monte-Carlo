@@ -40,14 +40,13 @@ Detalhes das decisões do modelo em [`.ai/modelagem.md`](.ai/modelagem.md).
 
 | Ferramenta | Versão mínima |
 |-----------|--------------|
-| Python | 3.11 |
+| R | 4.5.0 |
 
 ### Instalação
 
-```bash
-python -m venv .venv
-source .venv/bin/activate         # Windows: .venv\Scripts\activate
-pip install -r requirements-dev.txt
+```r
+install.packages("renv")
+renv::restore()                   # instala as dependências travadas em renv.lock
 ```
 
 ### Variáveis de Ambiente (opcional)
@@ -64,13 +63,13 @@ Consulte [`.env.example`](.env.example) para a lista completa.
 ## Rodando localmente
 
 ```bash
-python scripts/run_simulation.py --n-simulacoes 10000 --seed 42
+Rscript scripts/run_simulation.R --n-simulacoes 10000 --seed 42
 ```
 
 ### Testes
 
-```bash
-pytest              # ver pyproject.toml para configuração de cobertura
+```r
+testthat::test_dir("tests/testthat")   # ou: devtools::test()
 ```
 
 ---
@@ -92,16 +91,16 @@ docs/
   respostas.md             # Esqueleto para registrar as respostas do grupo
   lab1.pdf                 # Enunciado completo (adicionar aqui)
 scripts/
-  run_simulation.py        # CLI que roda a simulação Monte Carlo completa
-src/
+  run_simulation.R         # CLI que roda a simulação Monte Carlo completa
+R/
   brasileirao_mc/          # Pacote principal
-    dados.py               # Carregamento e filtros do CSV (implementado)
-    estimativas.py         # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
-    simulacao.py           # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
-    classificacao.py       # Cálculo da tabela de classificação (implementado)
-    bootstrap.py           # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
+    dados.R                # Carregamento e filtros do CSV (implementado)
+    estimativas.R          # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
+    simulacao.R            # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
+    classificacao.R        # Cálculo da tabela de classificação (implementado)
+    bootstrap.R            # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
 tests/
-  unit/                    # Testes unitários (pytest)
+  testthat/                # Testes unitários (testthat)
 ```
 
 ## Contexto para IAs
@@ -111,7 +110,7 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
 | Arquivo | Descrição |
 |---------|-----------|
 | [.ai/contexto.md](.ai/contexto.md) | Visão geral: stack, fluxo principal e índice dos demais arquivos |
-| [.ai/padroes-codigo.md](.ai/padroes-codigo.md) | Padrões Python e de testes usados no projeto |
+| [.ai/padroes-codigo.md](.ai/padroes-codigo.md) | Padrões R e de testes usados no projeto |
 | [.ai/modelagem.md](.ai/modelagem.md) | Decisões do modelo estatístico dadas pelo enunciado |
 
 ## Documentação

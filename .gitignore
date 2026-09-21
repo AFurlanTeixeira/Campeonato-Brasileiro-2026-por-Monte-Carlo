@@ -48,7 +48,7 @@ $RECYCLE.BIN/
 
 
 # =============================================================================
-# IDEs — JetBrains (IntelliJ, PyCharm, etc.)
+# IDEs — JetBrains (IntelliJ, etc.)
 # =============================================================================
 .idea/
 *.iws
@@ -63,31 +63,31 @@ $RECYCLE.BIN/
 
 
 # =============================================================================
-# PYTHON
+# R
 # =============================================================================
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-.venv/
-venv/
-env/
-.python-version
-*.egg-info/
-build/
-dist/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
 
-# Testes e cobertura
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-coverage.xml
-.mypy_cache/
-.ruff_cache/
+# renv (dependências ficam em renv.lock, versionado; a library local, não)
+renv/library/
+renv/local/
+renv/cellar/
+renv/python/
+renv/sandbox/
+renv/staging/
 
-# Jupyter (caso o grupo use notebooks para explorar o modelo)
-.ipynb_checkpoints/
+# Testes e cobertura (testthat / covr)
+coverage.html
+lcov.info
+
+# R Markdown / Quarto (caso o grupo use para explorar o modelo)
+*.knit.md
+*.utf8.md
+*_cache/
+*_files/
 
 
 # =============================================================================
