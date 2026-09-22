@@ -118,14 +118,14 @@ docs/
 scripts/
   run_simulation.R         # CLI que roda a simulação Monte Carlo completa
 R/
-  brasileirao_mc/          # Pacote principal
-    dados.R                # Carregamento e filtros do CSV (implementado)
-    estimativas.R          # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
-    simulacao.R            # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
-    classificacao.R        # Cálculo da tabela de classificação (implementado)
-    bootstrap.R            # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
+  dados.R                  # Carregamento e filtros do CSV (implementado)
+  estimativas.R            # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
+  simulacao.R              # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
+  classificacao.R          # Cálculo da tabela de classificação (implementado)
+  bootstrap.R              # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
 tests/
   testthat/                # Testes unitários (testthat)
+DESCRIPTION                # Metadados do projeto e dependências (renv/testthat)
 ```
 
 ## Contexto para IAs

@@ -2,8 +2,8 @@
 
 Este documento registra as decisões do modelo estatístico **dadas pelo
 enunciado** (`docs/enunciado.md` / `lab1.pdf`), no formato de ADR, para
-servirem de referência rápida ao implementar `estimativas.py` e
-`simulacao.py`. Não inclui a atividade extra — a melhoria do modelo é uma
+servirem de referência rápida ao implementar `estimativas.R` e
+`simulacao.R`. Não inclui a atividade extra — a melhoria do modelo é uma
 decisão do grupo, registrada como ADR em aberto ao final.
 
 ## ADR-001: Modelo de gols por Poisson
@@ -39,4 +39,4 @@ individualmente.
 A ser decidido pelo grupo. Candidatos sugeridos pelo enunciado: fator de
 vantagem de mandante, ou θ/ϕ variando ao longo do campeonato. Registrar aqui
 a decisão do grupo e a justificativa quando definida, antes de implementar em
-`simulacao.py`.
+`simulacao.R`.

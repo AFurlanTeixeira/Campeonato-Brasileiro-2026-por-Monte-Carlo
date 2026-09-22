@@ -1,3 +1,0 @@
-"""Simulação Monte Carlo do Campeonato Brasileiro 2026 — ME524, Laboratório 1."""
-
-__version__ = "0.1.0"

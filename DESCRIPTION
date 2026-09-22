@@ -9,6 +9,7 @@ License: MIT
 Encoding: UTF-8
 Imports:
     dplyr,
+    tidyr,
     ggplot2,
     optparse
 Suggests:
