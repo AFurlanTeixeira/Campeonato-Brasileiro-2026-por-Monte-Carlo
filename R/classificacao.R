@@ -29,7 +29,8 @@ calcular_classificacao <- function(jogos) {
   times <- unique(c(jogos$time_mandante, jogos$time_visitante))
 
   tabela <- as.data.frame(matrix(
-    0L, nrow = length(times), ncol = length(.COLUNAS_TABELA),
+    0L,
+    nrow = length(times), ncol = length(.COLUNAS_TABELA),
     dimnames = list(times, .COLUNAS_TABELA)
   ))
 
