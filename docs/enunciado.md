@@ -1,6 +1,6 @@
 # Enunciado — Resumo
 
-Documento completo em [`lab1.pdf`](lab1.pdf) (colocar o PDF nesta pasta).
+Documento completo em [`lab1.pdf`](lab1.pdf).
 Este arquivo é só um resumo de referência rápida.
 
 ## Contexto
