@@ -151,7 +151,7 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
  
 1. Estimar θ e ϕ para cada time a partir dos jogos já disputados.
 2. Criar uma função que calcule a classificação completa do campeonato (pontos, vitórias, saldo de gols) a partir de uma tabela de resultados.
-3. Simular os jogos pendentes (rodadas 21–38) segundo o modelo Poisson proposto.
+3. Simular os jogos pendentes (rodadas 29–38) segundo o modelo Poisson proposto.
 4. Repetir a simulação N vezes (Monte Carlo) e registrar as métricas necessárias para responder às perguntas.
 5. Calcular intervalos de confiança via bootstrap para θ e ϕ.
 6. Implementar e comparar a melhoria proposta na atividade extra.
