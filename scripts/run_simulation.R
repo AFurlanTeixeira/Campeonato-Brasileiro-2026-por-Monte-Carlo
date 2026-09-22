@@ -13,17 +13,20 @@ for (arquivo in list.files("R", pattern = "\\.R$", full.names = TRUE)) {
   source(arquivo)
 }
 
-parser <- OptionParser(description = "Simulacao Monte Carlo do Campeonato Brasileiro 2026")
-parser <- add_option(parser, "--data-path", type = "character",
-  default = Sys.getenv("DATA_PATH", "data/raw/brasileirao_2026.csv"),
-  help = "Caminho do CSV de jogos.")
-parser <- add_option(parser, "--n-simulacoes", type = "integer",
-  default = as.integer(Sys.getenv("N_SIMULACOES", 10000)),
-  help = "Numero de repeticoes da simulacao Monte Carlo.")
-parser <- add_option(parser, "--seed", type = "integer",
-  default = as.integer(Sys.getenv("RANDOM_SEED", 42)),
-  help = "Seed do gerador de numeros aleatorios.")
+default_data_path <- Sys.getenv("DATA_PATH", "data/raw/brasileirao_2026.csv")
+default_n_simulacoes <- as.integer(Sys.getenv("N_SIMULACOES", 10000))
+default_seed <- as.integer(Sys.getenv("RANDOM_SEED", 42))
 
+option_list <- list(
+  make_option("--data-path", default = default_data_path, help = "Caminho do CSV de jogos."),
+  make_option("--n-simulacoes", default = default_n_simulacoes, help = "Numero de simulacoes."),
+  make_option("--seed", default = default_seed, help = "Seed do gerador de numeros aleatorios.")
+)
+
+parser <- OptionParser(
+  description = "Simulacao Monte Carlo do Campeonato Brasileiro 2026",
+  option_list = option_list
+)
 args <- parse_args(parser)
 
 jogos <- carregar_jogos(args$data_path)
