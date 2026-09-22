@@ -1,6 +1,8 @@
 # Carrega as funcoes de R/ antes de rodar os testes.
-# Assume que os testes sao executados a partir da raiz do repositorio
-# (ver README.md / CLAUDE.md).
-for (arquivo in list.files("R", pattern = "\\.R$", full.names = TRUE)) {
+# testthat::test_dir()/test_file() mudam o diretorio de trabalho para
+# tests/testthat durante a execucao, entao o caminho e relativo a esta
+# pasta (dois niveis acima = raiz do repositorio).
+.dir_r <- file.path("..", "..", "R")
+for (arquivo in list.files(.dir_r, pattern = "\\.R$", full.names = TRUE)) {
   source(arquivo)
 }

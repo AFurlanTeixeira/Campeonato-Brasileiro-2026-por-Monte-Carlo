@@ -23,12 +23,22 @@ jobs:
       - name: Lint (lintr)
         run: |
           Rscript -e '
-            lints <- lintr::lint_dir(c("R", "scripts", "tests"))
-            print(lints)
-            if (length(lints) > 0) quit(status = 1, save = "no")
+            dirs <- c("R", "scripts", "tests")
+            total <- 0
+            for (d in dirs) {
+              lints <- lintr::lint_dir(d)
+              print(lints)
+              total <- total + length(lints)
+            }
+            if (total > 0) quit(status = 1, save = "no")
           '
         shell: bash
 
       - name: Verificar formatação (styler)
-        run: Rscript -e 'styler::style_dir(c("R", "scripts", "tests"), dry = "fail")'
+        run: |
+          Rscript -e '
+            for (d in c("R", "scripts", "tests")) {
+              styler::style_dir(d, dry = "fail")
+            }
+          '
         shell: bash
