@@ -83,11 +83,12 @@ renv/staging/
 coverage.html
 lcov.info
 
-# R Markdown / Quarto (caso o grupo use para explorar o modelo)
+# R Markdown / Quarto (o .Rmd fica versionado; o HTML renderizado, não)
 *.knit.md
 *.utf8.md
 *_cache/
 *_files/
+docs/*.html
 
 
 # =============================================================================

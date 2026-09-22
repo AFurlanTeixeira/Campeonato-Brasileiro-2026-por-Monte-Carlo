@@ -11,39 +11,46 @@ PONTOS_EMPATE <- 1
 PONTOS_DERROTA <- 0
 TIMES_REBAIXADOS <- 4
 
-.COLUNAS_TABELA <- c(
-  "pontos", "vitorias", "empates", "derrotas",
-  "gols_marcados", "gols_sofridos", "saldo_gols", "jogos"
-)
-
 #' Calcula a tabela de classificacao a partir de uma tabela de jogos.
+#'
+#' Vetorizada: cada jogo contribui uma linha para o mandante e uma para o
+#' visitante (mesma ideia de `estimar_parametros()`), e as colunas sao
+#' agregadas por time com `tapply()` em vez de um loop jogo a jogo -- a
+#' versao anterior, com loop, levava ~12min para N=10000 temporadas
+#' simuladas; ver `.ai/padroes-codigo.md`.
 #'
 #' @param jogos data.frame com `gols_mandante`/`gols_visitante` preenchidos
 #'   (so jogos ja disputados, ou ja simulados). Colunas esperadas:
 #'   `time_mandante`, `gols_mandante`, `time_visitante`, `gols_visitante`.
 #' @return data.frame indexado por time (nomes de linha), ordenado da 1a a
 #'   ultima colocacao (criterios: pontos -> vitorias -> saldo de gols ->
-#'   gols marcados, do enunciado), com as colunas em `.COLUNAS_TABELA` mais
-#'   `posicao` e `rebaixado`.
+#'   gols marcados, do enunciado), com colunas `pontos`, `vitorias`,
+#'   `empates`, `derrotas`, `gols_marcados`, `gols_sofridos`, `saldo_gols`,
+#'   `jogos`, `posicao` e `rebaixado`.
 calcular_classificacao <- function(jogos) {
-  times <- unique(c(jogos$time_mandante, jogos$time_visitante))
+  times <- sort(unique(c(jogos$time_mandante, jogos$time_visitante)))
 
-  tabela <- as.data.frame(matrix(
-    0L,
-    nrow = length(times), ncol = length(.COLUNAS_TABELA),
-    dimnames = list(times, .COLUNAS_TABELA)
-  ))
+  marcados <- c(jogos$gols_mandante, jogos$gols_visitante)
+  sofridos <- c(jogos$gols_visitante, jogos$gols_mandante)
+  time_emp <- c(jogos$time_mandante, jogos$time_visitante)
 
-  # Implementacao simples via loop, por clareza. Como esta funcao roda uma
-  # vez por temporada simulada (N vezes no laco de Monte Carlo), vale a pena
-  # revisitar com uma versao vetorizada (dplyr::group_by/summarise) se N
-  # grande deixar a simulacao lenta -- ver `.ai/padroes-codigo.md`.
-  for (i in seq_len(nrow(jogos))) {
-    jogo <- jogos[i, ]
-    tabela <- .atualizar_time(tabela, jogo$time_mandante, jogo$gols_mandante, jogo$gols_visitante)
-    tabela <- .atualizar_time(tabela, jogo$time_visitante, jogo$gols_visitante, jogo$gols_mandante)
-  }
+  vitoria <- marcados > sofridos
+  empate <- marcados == sofridos
+  derrota <- !(vitoria | empate)
+  pontos_jogo <- PONTOS_VITORIA * vitoria + PONTOS_EMPATE * empate + PONTOS_DERROTA * derrota
 
+  agregar <- function(x) as.numeric(tapply(x, time_emp, sum)[times])
+
+  tabela <- data.frame(
+    pontos = agregar(pontos_jogo),
+    vitorias = agregar(vitoria),
+    empates = agregar(empate),
+    derrotas = agregar(derrota),
+    gols_marcados = agregar(marcados),
+    gols_sofridos = agregar(sofridos),
+    jogos = agregar(rep(1, length(marcados))),
+    row.names = times
+  )
   tabela$saldo_gols <- tabela$gols_marcados - tabela$gols_sofridos
 
   ordem <- order(-tabela$pontos, -tabela$vitorias, -tabela$saldo_gols, -tabela$gols_marcados)
@@ -51,25 +58,6 @@ calcular_classificacao <- function(jogos) {
 
   tabela$posicao <- seq_len(nrow(tabela))
   tabela$rebaixado <- tabela$posicao > (nrow(tabela) - TIMES_REBAIXADOS)
-
-  tabela
-}
-
-.atualizar_time <- function(tabela, time, gols_pro, gols_contra) {
-  tabela[time, "jogos"] <- tabela[time, "jogos"] + 1
-  tabela[time, "gols_marcados"] <- tabela[time, "gols_marcados"] + gols_pro
-  tabela[time, "gols_sofridos"] <- tabela[time, "gols_sofridos"] + gols_contra
-
-  if (gols_pro > gols_contra) {
-    tabela[time, "vitorias"] <- tabela[time, "vitorias"] + 1
-    tabela[time, "pontos"] <- tabela[time, "pontos"] + PONTOS_VITORIA
-  } else if (gols_pro == gols_contra) {
-    tabela[time, "empates"] <- tabela[time, "empates"] + 1
-    tabela[time, "pontos"] <- tabela[time, "pontos"] + PONTOS_EMPATE
-  } else {
-    tabela[time, "derrotas"] <- tabela[time, "derrotas"] + 1
-    tabela[time, "pontos"] <- tabela[time, "pontos"] + PONTOS_DERROTA
-  }
 
   tabela
 }

@@ -1,0 +1,359 @@
+---
+title: "Predição do Campeonato Brasileiro 2026 por Monte Carlo"
+subtitle: "Laboratório 1 — ME524, Unicamp (2026)"
+author: "Nome dos integrantes do grupo"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Carrega as funcoes do pacote (R/) -- este arquivo fica em docs/, entao os
+# caminhos abaixo sao relativos a raiz do repositorio.
+for (arquivo in list.files("../R", pattern = "\\.R$", full.names = TRUE)) {
+  source(arquivo)
+}
+```
+
+# Introdução
+
+Este relatório estima a força de ataque ($\theta$) e defesa ($\phi$) de cada
+time do Campeonato Brasileiro 2026 a partir dos jogos já disputados, simula
+os jogos pendentes segundo o modelo de gols por Poisson do enunciado e usa
+as simulações para responder às perguntas do laboratório (ver
+[`docs/enunciado.md`](enunciado.md)). As decisões de modelagem dadas pelo
+enunciado estão documentadas como ADRs em
+[`.ai/modelagem.md`](../.ai/modelagem.md); este relatório segue essas
+decisões e só implementa o que está em aberto para o grupo (a atividade
+extra, na última seção).
+
+O código usa exclusivamente as funções do pacote (`R/*.R`), já testadas em
+`tests/testthat/`; nenhuma lógica de estimação, simulação ou classificação é
+reimplementada aqui.
+
+# Preparação dos dados
+
+```{r carregar-dados}
+jogos <- carregar_jogos("../data/raw/brasileirao_2026.csv")
+disputados <- jogos_disputados(jogos)
+pendentes <- jogos_pendentes(jogos)
+
+cat("Jogos disputados:", nrow(disputados), "| pendentes:", nrow(pendentes), "\n")
+```
+
+```{r profiling-dados}
+range(table(c(disputados$time_mandante, disputados$time_visitante)))
+```
+
+Os 20 times não têm exatamente o mesmo número de jogos disputados (algumas
+rodadas ainda estão incompletas), então $\theta$/$\phi$ comparam times com
+bases amostrais um pouco diferentes. Como são médias *por jogo*, isso não
+enviesa a estimativa, só afeta a precisão relativa entre times (ver
+intervalos de confiança na seção de bootstrap).
+
+# Estimação de $\theta$ e $\phi$
+
+```{r estimar-parametros}
+parametros <- estimar_parametros(disputados)
+head(parametros)
+```
+
+## Limitação: o modelo não tem vantagem de mandante
+
+$\theta$ e $\phi$ (ADR-002) misturam jogos em casa e fora, então o time
+nasce sem vantagem de jogar em casa. Nos jogos já disputados isso não é o
+que se observa:
+
+```{r vantagem-mandante}
+disputados %>%
+  summarise(
+    gols_mandante_medio = mean(gols_mandante),
+    gols_visitante_medio = mean(gols_visitante),
+    vitoria_mandante = mean(gols_mandante > gols_visitante),
+    empate = mean(gols_mandante == gols_visitante),
+    vitoria_visitante = mean(gols_mandante < gols_visitante)
+  )
+```
+
+O mandante marca mais e vence com mais frequência do que o visitante, mas os
+$\lambda$ do modelo (calculados a seguir) saem parecidos para os dois
+lados — o enunciado pede exatamente esse modelo; a seção
+["Atividade extra"](#atividade-extra) retoma esse ponto.
+
+# Classificação atual
+
+`calcular_classificacao()` (já implementada e testada em
+`R/classificacao.R`) serve tanto para a tabela atual quanto, dentro do laço
+de Monte Carlo, para cada temporada simulada.
+
+```{r classificacao-atual}
+tabela_atual <- calcular_classificacao(disputados)
+tabela_atual[, c("posicao", "pontos", "vitorias", "saldo_gols", "gols_marcados")]
+```
+
+# Simulação de uma temporada
+
+```{r simular-uma-temporada}
+temporada_exemplo <- simular_temporada(pendentes, parametros, seed = 1)
+head(temporada_exemplo)
+```
+
+# Simulação Monte Carlo
+
+Para cada uma das $N$ réplicas: simula os jogos pendentes
+(`simular_temporada()`), junta com os jogos já disputados e calcula a
+classificação final (`calcular_classificacao()`). Guardamos só o essencial
+por réplica: pontos e posição final de cada time, e se houve empate em
+pontos no topo da tabela.
+
+```{r monte-carlo, cache=TRUE}
+N <- 10000
+set.seed(524)
+
+times <- rownames(parametros)
+pontos_mat <- matrix(0, nrow = N, ncol = length(times), dimnames = list(NULL, times))
+posicao_mat <- matrix(0L, nrow = N, ncol = length(times), dimnames = list(NULL, times))
+empate_topo <- logical(N)
+
+for (r in seq_len(N)) {
+  simulados <- simular_temporada(pendentes, parametros, seed = r)
+  tabela <- calcular_classificacao(rbind(disputados, simulados))
+
+  pontos_mat[r, ] <- tabela[times, "pontos"]
+  posicao_mat[r, ] <- tabela[times, "posicao"]
+  empate_topo[r] <- sum(tabela$pontos == max(tabela$pontos)) > 1
+}
+```
+
+# Classificação esperada após a simulação
+
+Consolidando as `r format(N, big.mark = ".", decimal.mark = ",")` réplicas em uma única tabela:
+pontos médios, posição média e as probabilidades de título e rebaixamento
+de cada time (as mesmas das perguntas 1 e 2, lado a lado). A ordenação é
+pela posição média — não é a classificação de uma réplica específica, é a
+média sobre todas elas.
+
+```{r classificacao-simulada}
+# Os nomes dos times vem das colunas de pontos_mat/posicao_mat (colMeans()
+# preserva os nomes das colunas), igual a calcular_classificacao() -- por
+# isso, como em `tabela_atual`, o time aparece só como nome de linha, sem
+# uma coluna repetida.
+classificacao_simulada <- data.frame(
+  pontos_medios = round(colMeans(pontos_mat), 1),
+  posicao_media = round(colMeans(posicao_mat), 1),
+  p_campeao = colMeans(posicao_mat == 1),
+  p_rebaixado = colMeans(posicao_mat >= 17)
+) %>%
+  arrange(posicao_media) %>%
+  mutate(posicao = row_number(), .before = pontos_medios)
+
+classificacao_simulada
+```
+
+# Pergunta 1 — Probabilidade de cada time ser campeão
+
+```{r q1-campeao}
+erro_mc <- function(p, n) sqrt(p * (1 - p) / n)
+
+p_campeao <- colMeans(posicao_mat == 1)
+
+resultado_q1 <- data.frame(
+  time = times,
+  p_campeao = p_campeao,
+  erro_mc = erro_mc(p_campeao, N)
+) %>% arrange(desc(p_campeao))
+
+resultado_q1
+```
+
+# Pergunta 2 — Probabilidade de cada time ser rebaixado
+
+O enunciado rebaixa os 4 últimos colocados, ou seja, posições 17 a 20.
+
+```{r q2-rebaixamento}
+p_rebaixado <- colMeans(posicao_mat >= 17)
+
+resultado_q2 <- data.frame(
+  time = times,
+  p_rebaixado = p_rebaixado,
+  erro_mc = erro_mc(p_rebaixado, N)
+) %>% arrange(desc(p_rebaixado))
+
+resultado_q2
+```
+
+Quando `p_rebaixado` é 0 ou 1 em todas as `N` réplicas, o erro Monte Carlo
+acima também sai 0 — isso não significa certeza, só que o evento não
+ocorreu (ou sempre ocorreu) nas réplicas rodadas. Para esses casos um
+limite superior mais honesto é $3/N$ (regra de três para zero eventos em
+`N` tentativas de Bernoulli).
+
+# Pergunta 3 — Probabilidade de decisão por critério de desempate
+
+**Ambiguidade a resolver no texto final:** "decidido pelos critérios de
+desempate" pode significar (a) o título saiu empatado em pontos no topo, ou
+(b) *alguma* posição relevante (título ou última vaga de rebaixamento) saiu
+empatada em pontos. São leituras diferentes e merecem números separados.
+
+```{r q3-desempate}
+p_empate_topo <- mean(empate_topo)
+
+posicoes_ordenadas_por_pontos <- t(apply(pontos_mat, 1, function(p) sort(p, decreasing = TRUE)))
+empate_16_17 <- posicoes_ordenadas_por_pontos[, 16] == posicoes_ordenadas_por_pontos[, 17]
+p_empate_rebaixamento <- mean(empate_16_17)
+
+data.frame(
+  interpretacao = c("Empate no título (posição 1)", "Empate na última vaga de rebaixamento (16º-17º)"),
+  probabilidade = c(p_empate_topo, p_empate_rebaixamento),
+  erro_mc = erro_mc(c(p_empate_topo, p_empate_rebaixamento), N)
+)
+```
+
+# Pergunta 4 — Valor esperado de pontos do campeão
+
+```{r q4-pontos-campeao}
+pontos_campeao <- pontos_mat[posicao_mat == 1]
+stopifnot(length(pontos_campeao) == N) # exatamente um campeao por replica
+
+media_pontos_campeao <- mean(pontos_campeao)
+erro_mc_media <- sd(pontos_campeao) / sqrt(N)
+intervalo_predicao <- quantile(pontos_campeao, c(0.025, 0.975))
+
+cat("Média de pontos do campeão:", media_pontos_campeao, "\n")
+cat("Erro Monte Carlo da média:", erro_mc_media, "\n")
+cat("Intervalo de predição 95% (entre réplicas):", intervalo_predicao, "\n")
+```
+
+O erro Monte Carlo acima é sobre a *média*; o intervalo de predição descreve
+a variabilidade dos pontos do campeão *entre réplicas* — são coisas
+diferentes e não devem ser confundidas no texto final.
+
+# Pergunta 5 — Pontos para ≥90% de chance de título
+
+Para cada valor de pontos observado nas simulações, calculamos a proporção
+de vezes em que esse valor correspondeu ao campeão. Como essa proporção não
+é estritamente monótona (ruído de simulação, principalmente nos extremos
+com poucas observações), usamos o menor valor de pontos a partir do qual
+**todos** os valores maiores também têm proporção ≥ 90%.
+
+```{r q5-pontos-90-titulo}
+pontos_vetor <- as.vector(pontos_mat)
+campeao_vetor <- as.vector(posicao_mat == 1)
+
+prop_campeao_por_pontos <- tapply(campeao_vetor, pontos_vetor, mean)
+n_por_pontos <- tapply(campeao_vetor, pontos_vetor, length)
+valores_pontos <- sort(unique(pontos_vetor))
+
+acima_do_limiar <- vapply(valores_pontos, function(x) {
+  chave <- as.character(valores_pontos[valores_pontos >= x])
+  all(prop_campeao_por_pontos[chave] >= 0.90)
+}, logical(1))
+
+pontos_90_titulo <- min(valores_pontos[acima_do_limiar])
+cat("Pontos para >=90% de chance de título:", pontos_90_titulo, "\n")
+
+data.frame(pontos = valores_pontos, prop_campeao = as.numeric(prop_campeao_por_pontos), n = as.numeric(n_por_pontos))
+```
+
+# Pergunta 6 — Pontos para ≥95% de chance de escapar do rebaixamento
+
+Mesma lógica da pergunta anterior, trocando "foi campeão" por "não foi
+rebaixado" (posição < 17) e o limiar para 95%.
+
+```{r q6-pontos-95-permanencia}
+nao_rebaixado_vetor <- as.vector(posicao_mat < 17)
+
+prop_permanencia_por_pontos <- tapply(nao_rebaixado_vetor, pontos_vetor, mean)
+
+acima_do_limiar_perm <- vapply(valores_pontos, function(x) {
+  chave <- as.character(valores_pontos[valores_pontos >= x])
+  all(prop_permanencia_por_pontos[chave] >= 0.95)
+}, logical(1))
+
+pontos_95_permanencia <- min(valores_pontos[acima_do_limiar_perm])
+cat("Pontos para >=95% de chance de não ser rebaixado:", pontos_95_permanencia, "\n")
+```
+
+# Variabilidade das estimativas: bootstrap de $\theta$ e $\phi$
+
+Para cada time, reamostramos com reposição os jogos que ele disputou
+(`bootstrap_parametros()`, ADR-003) e recalculamos $\theta$/$\phi$ em cada
+reamostragem. O intervalo de confiança usado é o de percentis 2,5%–97,5%
+(`intervalo_confianca()`).
+
+```{r bootstrap}
+set.seed(2024)
+B <- 1000
+amostras_bootstrap <- bootstrap_parametros(disputados, n_reamostragens = B, seed = 2024)
+
+ic_por_time <- amostras_bootstrap %>%
+  group_by(time) %>%
+  summarise(
+    theta_medio = mean(theta),
+    theta_li = intervalo_confianca(theta)[1],
+    theta_ls = intervalo_confianca(theta)[2],
+    phi_medio = mean(phi),
+    phi_li = intervalo_confianca(phi)[1],
+    phi_ls = intervalo_confianca(phi)[2]
+  )
+
+ic_por_time
+```
+
+```{r bootstrap-grafico, fig.height=7, fig.width=8}
+grafico_dados <- ic_por_time %>%
+  select(
+    time,
+    marcados_medio = theta_medio, marcados_li = theta_li, marcados_ls = theta_ls,
+    sofridos_medio = phi_medio, sofridos_li = phi_li, sofridos_ls = phi_ls
+  ) %>%
+  pivot_longer(
+    cols = -time,
+    names_to = c("tipo", ".value"),
+    names_pattern = "(marcados|sofridos)_(medio|li|ls)"
+  )
+
+ordem_times <- ic_por_time$time[order(ic_por_time$theta_medio)]
+grafico_dados$time <- factor(grafico_dados$time, levels = ordem_times)
+
+ggplot(grafico_dados, aes(x = time, y = medio, ymin = li, ymax = ls)) +
+  geom_pointrange() +
+  coord_flip() +
+  facet_wrap(~tipo, labeller = as_labeller(c(marcados = "Gols marcados (θ)", sofridos = "Gols sofridos (φ)"))) +
+  labs(x = NULL, y = "Gols por jogo", title = "Intervalos de confiança (bootstrap, 95%) para θ e φ por time")
+```
+
+Com ~27–29 jogos por time, os intervalos de confiança são relativamente
+largos — vale discutir no texto final quais times têm as estimativas mais
+instáveis (IC mais largo) e o que isso significa para a confiabilidade das
+respostas 1 e 2. Importante: essa incerteza **não propaga** para a
+simulação Monte Carlo da seção anterior — lá, $\theta$/$\phi$ entram como
+constantes conhecidas, então `p_campeao`/`p_rebaixado` carregam só erro
+Monte Carlo, não erro de estimação. Propagar exigiria reestimar
+$\theta$/$\phi$ a cada réplica (fora do escopo pedido pelo enunciado).
+
+# Atividade extra {#atividade-extra}
+
+(ver ADR-004 em [`.ai/modelagem.md`](../.ai/modelagem.md))
+
+A limitação mais evidente, medida acima, é a ausência de vantagem de mandante:
+o mandante marca em média `r round(mean(disputados$gols_mandante), 2)` gols/jogo contra
+`r round(mean(disputados$gols_visitante), 2)` do visitante, mas o modelo do
+enunciado gera $\lambda$ parecidos para os dois lados. Uma proposta simples
+e barata de implementar (um fator multiplicativo único aplicado aos
+$\lambda$ de mandante/visitante) preservaria o resto do pipeline sem
+alterações; alternativas mais custosas (θ/φ separados por condição de
+mandante/visitante) reduzem a base amostral por parâmetro pela metade e
+merecem ser cruzadas com os IC da seção de bootstrap antes de adotadas.
+
+# Conclusão
+
+A definir

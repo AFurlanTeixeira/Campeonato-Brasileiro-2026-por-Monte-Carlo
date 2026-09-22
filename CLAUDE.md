@@ -28,6 +28,7 @@ Rscript -e 'install.packages("renv"); renv::restore()'
 
 Rscript -e 'testthat::test_dir("tests/testthat")'   # testes unitários (ver DESCRIPTION)
 Rscript scripts/run_simulation.R                    # roda a simulação Monte Carlo completa
+Rscript -e 'rmarkdown::render("docs/relatorio.Rmd")' # gera docs/relatorio.html (requer rmarkdown/knitr)
 ```
 
 Rodar um único arquivo de teste:
@@ -65,11 +66,16 @@ data/raw/brasileirao_2026.csv
 
 ### O que está implementado vs. pendente
 
-`dados.R` e `classificacao.R` têm implementação completa (são utilitários
-mecânicos, não a parte avaliada do laboratório). `estimativas.R`,
-`simulacao.R` e `bootstrap.R` estão como esqueleto (assinatura + roxygen2
-+ `TODO`) — são o núcleo estatístico que o grupo precisa implementar e que é
-avaliado no laboratório.
+Todos os módulos (`dados.R`, `estimativas.R`, `simulacao.R`,
+`classificacao.R`, `bootstrap.R`) têm implementação completa e testada
+(`tests/testthat/`). `classificacao.R` é vetorizado (agregação com
+`tapply()`) — a versão anterior com loop levava ~12min para N=10000
+temporadas simuladas.
+
+`docs/relatorio.Rmd` usa esses módulos para responder às perguntas 1–6 do
+enunciado e calcular os IC via bootstrap; falta só a atividade extra (em
+aberto para o grupo, ver `.ai/modelagem.md` ADR-004) e o texto
+interpretativo final.
 
 ---
 

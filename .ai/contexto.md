@@ -30,3 +30,4 @@ CSV (jogos) → estimar θ/ϕ por time → simular jogos pendentes (Poisson, N v
 | [.ai/modelagem.md](modelagem.md) | Decisões do modelo estatístico dadas pelo enunciado |
 | [docs/enunciado.md](../docs/enunciado.md) | Resumo do enunciado e das perguntas a responder |
 | [docs/respostas.md](../docs/respostas.md) | Esqueleto para registrar as respostas do grupo |
+| [docs/relatorio.Rmd](../docs/relatorio.Rmd) | Relatório executável (código + texto) que responde às perguntas 1–6 e o bootstrap |

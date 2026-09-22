@@ -9,14 +9,28 @@
 
 #' Estima theta e phi para cada time a partir dos jogos ja disputados.
 #'
+#' Cada jogo contribui uma vez para o mandante (gols marcados/sofridos como
+#' mandante) e uma vez para o visitante -- por isso os dois lados sao
+#' empilhados antes de agregar por time (ADR-002).
+#'
 #' @param jogos_disputados jogos com `gols_mandante`/`gols_visitante`
 #'   preenchidos (ver `jogos_disputados()` em `R/dados.R`).
-#' @return data.frame indexado por time, com colunas `theta` e `phi`.
-#'
-#' TODO(grupo): implementar o estimador (ADR-002 em `.ai/modelagem.md`).
-#' Lembrar que cada jogo contribui para o ataque/defesa de dois times (o
-#' mandante e o visitante), cada um com seus proprios gols marcados/sofridos
-#' naquele jogo.
+#' @return data.frame indexado por time (nomes de linha), com colunas
+#'   `theta` e `phi`.
 estimar_parametros <- function(jogos_disputados) {
-  stop("estimar_parametros ainda nao implementado")
+  times <- sort(unique(c(jogos_disputados$time_mandante, jogos_disputados$time_visitante)))
+
+  marcados <- c(jogos_disputados$gols_mandante, jogos_disputados$gols_visitante)
+  sofridos <- c(jogos_disputados$gols_visitante, jogos_disputados$gols_mandante)
+  time_emp <- c(jogos_disputados$time_mandante, jogos_disputados$time_visitante)
+
+  soma_marcados <- tapply(marcados, time_emp, sum)
+  soma_sofridos <- tapply(sofridos, time_emp, sum)
+  n_jogos <- tapply(marcados, time_emp, length)
+
+  data.frame(
+    theta = as.numeric(soma_marcados[times] / n_jogos[times]),
+    phi = as.numeric(soma_sofridos[times] / n_jogos[times]),
+    row.names = times
+  )
 }
