@@ -1,0 +1,77 @@
+"""Testes de `classificacao.calcular_classificacao`.
+
+Usa uma "mini-liga" de 3 times fabricada à mão, com resultado esperado
+calculado manualmente — inclusive um empate em pontos para exercitar os
+critérios de desempate (vitórias → saldo de gols → gols marcados).
+"""
+
+from __future__ import annotations
+
+import pandas as pd
+
+from brasileirao_mc.classificacao import calcular_classificacao
+
+
+def _jogo(mandante, gm, visitante, gv):
+    return {
+        "time_mandante": mandante,
+        "gols_mandante": gm,
+        "time_visitante": visitante,
+        "gols_visitante": gv,
+    }
+
+
+def test_ordena_por_pontos():
+    jogos = pd.DataFrame(
+        [
+            _jogo("A", 3, "B", 0),  # A vence
+            _jogo("B", 1, "C", 1),  # empate
+            _jogo("C", 0, "A", 2),  # A vence
+        ]
+    )
+
+    tabela = calcular_classificacao(jogos)
+
+    # A: 2 vitórias (6 pts) > C: 1 empate (1 pt) > B: 1 empate (1 pt),
+    # mas B e C empatam em pontos — desempate por saldo de gols decide.
+    assert list(tabela.index) == ["A", "C", "B"]
+    assert tabela.loc["A", "pontos"] == 6
+    assert tabela.loc["A", "vitorias"] == 2
+
+
+def test_desempate_por_saldo_de_gols():
+    # B e C terminam com os mesmos pontos e vitórias; C tem saldo melhor.
+    jogos = pd.DataFrame(
+        [
+            _jogo("A", 0, "B", 0),
+            _jogo("A", 0, "C", 0),
+            _jogo("B", 3, "D", 0),
+            _jogo("C", 5, "D", 0),
+        ]
+    )
+
+    tabela = calcular_classificacao(jogos)
+
+    assert tabela.loc["B", "pontos"] == tabela.loc["C", "pontos"]
+    assert tabela.loc["B", "vitorias"] == tabela.loc["C", "vitorias"]
+    assert tabela.loc["C", "saldo_gols"] > tabela.loc["B", "saldo_gols"]
+    assert list(tabela.index).index("C") < list(tabela.index).index("B")
+
+
+def test_marca_rebaixados():
+    # 6 times, 4 são rebaixados (TIMES_REBAIXADOS) — só os 2 primeiros ficam de fora.
+    jogos = pd.DataFrame(
+        [
+            _jogo("A", 3, "B", 0),
+            _jogo("A", 3, "C", 0),
+            _jogo("B", 3, "D", 0),
+            _jogo("C", 3, "E", 0),
+            _jogo("D", 0, "F", 0),
+            _jogo("E", 0, "F", 0),
+        ]
+    )
+
+    tabela = calcular_classificacao(jogos)
+
+    assert tabela["rebaixado"].sum() == 4
+    assert not tabela.loc["A", "rebaixado"]
