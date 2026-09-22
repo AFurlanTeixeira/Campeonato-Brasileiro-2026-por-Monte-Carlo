@@ -65,7 +65,7 @@ Detalhes das decisões do modelo em [`.ai/modelagem.md`](.ai/modelagem.md).
 
 ---
 
-## Configuração do Projeto
+## 🛠️ Configuração do Projeto
 
 ### Pré-requisitos
 
@@ -91,7 +91,7 @@ Consulte [`.env.example`](.env.example) para a lista completa.
 
 ---
 
-## Rodando localmente
+## 🏡 Rodando localmente
 
 ```bash
 Rscript scripts/run_simulation.R --n-simulacoes 10000 --seed 42
@@ -105,7 +105,7 @@ testthat::test_dir("tests/testthat")   # ou: devtools::test()
 
 ---
 
-## Estrutura de Pastas
+## 💾 Estrutura de Pastas
 
 ```
 data/
@@ -128,7 +128,7 @@ tests/
 DESCRIPTION                # Metadados do projeto e dependências (renv/testthat)
 ```
 
-## Contexto para IAs
+## 🤖 Contexto para IAs
 
 A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso com ferramentas de IA (Claude Code, Cursor, Copilot, etc.):
 
@@ -138,7 +138,7 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
 | [.ai/padroes-codigo.md](.ai/padroes-codigo.md) | Padrões R e de testes usados no projeto |
 | [.ai/modelagem.md](.ai/modelagem.md) | Decisões do modelo estatístico dadas pelo enunciado |
 
-## Documentação
+## 📄 Documentação
 
 | Arquivo | Descrição |
 |---------|-----------|
