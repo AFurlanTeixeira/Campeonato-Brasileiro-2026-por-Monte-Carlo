@@ -7,18 +7,38 @@
 
 #' Gera `n_reamostragens` estimativas de theta/phi por time via bootstrap.
 #'
+#' Para cada time, reamostra com reposicao os jogos que ele disputou (na
+#' mesma representacao "uma linha por participacao em jogo" usada em
+#' `estimar_parametros()`) e recalcula theta/phi em cada amostra.
+#'
 #' @param jogos_disputados jogos ja disputados (ver `jogos_disputados()` em
 #'   `R/dados.R`).
 #' @param n_reamostragens numero de amostras bootstrap.
 #' @param seed semente do gerador de numeros aleatorios.
 #' @return data.frame longo com uma linha por (time, reamostragem), colunas
-#'   `theta` e `phi` -- pronto para calcular percentis (IC) ou plotar.
-#'
-#' TODO(grupo): para cada time, reamostrar os jogos dele com reposicao
-#' (`n_reamostragens` vezes) e recalcular theta/phi em cada amostra usando
-#' `estimar_parametros()` (ou a logica equivalente por time).
+#'   `time`, `theta` e `phi` -- pronto para calcular percentis (IC) ou
+#'   plotar.
 bootstrap_parametros <- function(jogos_disputados, n_reamostragens, seed) {
-  stop("bootstrap_parametros ainda nao implementado")
+  set.seed(seed)
+
+  times <- sort(unique(c(jogos_disputados$time_mandante, jogos_disputados$time_visitante)))
+  marcados <- c(jogos_disputados$gols_mandante, jogos_disputados$gols_visitante)
+  sofridos <- c(jogos_disputados$gols_visitante, jogos_disputados$gols_mandante)
+  time_emp <- c(jogos_disputados$time_mandante, jogos_disputados$time_visitante)
+
+  por_time <- lapply(times, function(time_atual) {
+    indices <- which(time_emp == time_atual)
+    n_jogos <- length(indices)
+    reamostras <- replicate(n_reamostragens, sample(indices, n_jogos, replace = TRUE))
+
+    data.frame(
+      time = time_atual,
+      theta = colMeans(matrix(marcados[reamostras], nrow = n_jogos)),
+      phi = colMeans(matrix(sofridos[reamostras], nrow = n_jogos))
+    )
+  })
+
+  do.call(rbind, por_time)
 }
 
 #' Calcula o IC por percentis a partir de amostras bootstrap.

@@ -97,6 +97,12 @@ Consulte [`.env.example`](.env.example) para a lista completa.
 Rscript scripts/run_simulation.R --n-simulacoes 10000 --seed 42
 ```
 
+### Relatório
+
+```r
+rmarkdown::render("docs/relatorio.Rmd")   # gera docs/relatorio.html
+```
+
 ### Testes
 
 ```r
@@ -114,15 +120,16 @@ data/
 docs/
   enunciado.md             # Resumo do enunciado e das perguntas
   respostas.md             # Esqueleto para registrar as respostas do grupo
-  lab1.pdf                 # Enunciado completo (adicionar aqui)
+  relatorio.Rmd            # Relatório executável (código + texto) com as respostas 1-6
+  lab1.pdf                 # Enunciado completo
 scripts/
   run_simulation.R         # CLI que roda a simulação Monte Carlo completa
 R/
   dados.R                  # Carregamento e filtros do CSV (implementado)
-  estimativas.R            # Estimação de θ/ϕ por time (TODO — núcleo avaliado)
-  simulacao.R              # Simulação Poisson dos jogos pendentes (TODO — núcleo avaliado)
-  classificacao.R          # Cálculo da tabela de classificação (implementado)
-  bootstrap.R              # IC via bootstrap para θ/ϕ (TODO — núcleo avaliado)
+  estimativas.R            # Estimação de θ/ϕ por time (implementado)
+  simulacao.R              # Simulação Poisson dos jogos pendentes (implementado)
+  classificacao.R          # Cálculo da tabela de classificação (implementado, vetorizado)
+  bootstrap.R              # IC via bootstrap para θ/ϕ (implementado)
 tests/
   testthat/                # Testes unitários (testthat)
 DESCRIPTION                # Metadados do projeto e dependências (renv/testthat)
@@ -144,6 +151,7 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
 |---------|-----------|
 | [docs/enunciado.md](docs/enunciado.md) | Resumo do enunciado e das perguntas a responder |
 | [docs/respostas.md](docs/respostas.md) | Esqueleto para o relatório final do grupo |
+| [docs/relatorio.Rmd](docs/relatorio.Rmd) | Relatório executável: código + texto respondendo às perguntas 1-6 e o bootstrap |
 
 ---
 
@@ -159,15 +167,15 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
  
 ### ✅ Checklist de Entregas
  
-[ ] Estimação de θ e ϕ por time
+[x] Estimação de θ e ϕ por time
 
-[ ] Função de cálculo da classificação (com critérios de desempate)
+[x] Função de cálculo da classificação (com critérios de desempate)
 
-[ ] Simulação Monte Carlo dos jogos pendentes
+[x] Simulação Monte Carlo dos jogos pendentes
 
-[ ] Respostas às 6 perguntas do enunciado
+[x] Respostas às 6 perguntas do enunciado (calculadas em `docs/relatorio.Rmd`; falta o texto interpretativo final)
 
-[ ] Intervalos de confiança via bootstrap + gráfico
+[x] Intervalos de confiança via bootstrap + gráfico
 
 [ ] Atividade extra (melhoria do modelo, justificada e comparada)
 

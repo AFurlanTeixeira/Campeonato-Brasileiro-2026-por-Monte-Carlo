@@ -6,6 +6,10 @@
 
 #' Simula o placar de um jogo via Poisson (ADR-001).
 #'
+#' Util para simular um confronto isolado (ex.: exemplos, testes). Para uma
+#' temporada inteira, prefira `simular_temporada()`, que vetoriza a
+#' amostragem em vez de chamar esta funcao jogo a jogo.
+#'
 #' @param theta_mandante taxa de gols marcados do time mandante.
 #' @param phi_mandante taxa de gols sofridos do time mandante.
 #' @param theta_visitante taxa de gols marcados do time visitante.
@@ -13,25 +17,45 @@
 #' @param seed semente do gerador de numeros aleatorios, passada
 #'   explicitamente para reprodutibilidade (ver `.ai/padroes-codigo.md`).
 #' @return vetor nomeado `c(gols_mandante = ..., gols_visitante = ...)`.
-#'
-#' TODO(grupo): implementar a amostragem Poisson com os parametros
-#' `(theta_mandante + phi_visitante) / 2` e
-#' `(theta_visitante + phi_mandante) / 2`.
 simular_jogo <- function(theta_mandante, phi_mandante, theta_visitante, phi_visitante, seed) {
-  stop("simular_jogo ainda nao implementado")
+  set.seed(seed)
+
+  lambda_mandante <- (theta_mandante + phi_visitante) / 2
+  lambda_visitante <- (theta_visitante + phi_mandante) / 2
+
+  c(
+    gols_mandante = rpois(1, lambda_mandante),
+    gols_visitante = rpois(1, lambda_visitante)
+  )
 }
 
 #' Simula todos os jogos pendentes de uma temporada, uma vez.
 #'
+#' Vetorizada: os lambdas de todos os jogos pendentes sao calculados de uma
+#' vez e os gols sao amostrados com duas chamadas a `rpois()`, em vez de um
+#' loop jogo a jogo (ver `.ai/padroes-codigo.md`).
+#'
 #' @param jogos_pendentes jogos ainda nao realizados (ver `jogos_pendentes()`
 #'   em `R/dados.R`).
-#' @param parametros theta/phi por time (saida de `estimar_parametros()`).
+#' @param parametros theta/phi por time, indexado por nome do time (saida de
+#'   `estimar_parametros()`).
 #' @param seed semente do gerador de numeros aleatorios.
 #' @return copia de `jogos_pendentes` com `gols_mandante`/`gols_visitante`
 #'   preenchidos com os resultados simulados.
-#'
-#' TODO(grupo): aplicar `simular_jogo()` a cada linha, usando os parametros
-#' do mandante e do visitante de cada jogo.
 simular_temporada <- function(jogos_pendentes, parametros, seed) {
-  stop("simular_temporada ainda nao implementado")
+  set.seed(seed)
+
+  theta_mandante <- parametros[jogos_pendentes$time_mandante, "theta"]
+  phi_mandante <- parametros[jogos_pendentes$time_mandante, "phi"]
+  theta_visitante <- parametros[jogos_pendentes$time_visitante, "theta"]
+  phi_visitante <- parametros[jogos_pendentes$time_visitante, "phi"]
+
+  lambda_mandante <- (theta_mandante + phi_visitante) / 2
+  lambda_visitante <- (theta_visitante + phi_mandante) / 2
+
+  n <- nrow(jogos_pendentes)
+  jogos_pendentes$gols_mandante <- rpois(n, lambda_mandante)
+  jogos_pendentes$gols_visitante <- rpois(n, lambda_visitante)
+
+  jogos_pendentes
 }
