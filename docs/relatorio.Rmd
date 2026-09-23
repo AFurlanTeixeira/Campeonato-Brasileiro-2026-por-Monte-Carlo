@@ -1,7 +1,10 @@
 ---
 title: "Predição do Campeonato Brasileiro 2026 por Monte Carlo"
 subtitle: "Laboratório 1 — ME524, Unicamp (2026)"
-author: "Nome dos integrantes do grupo"
+author:
+  - "Arthur Agostinho Furlan Teixeira, RA: 164363"
+  - "Caio Frare, RA: 242578"
+  - "João Paulo de Castro Alves, RA: 256481"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -535,7 +538,7 @@ que a temporada já está bastante decidida na parte de cima da tabela: o
 título é uma disputa quase exclusiva entre Flamengo
 (`r round(p_campeao[["Flamengo"]] * 100, 1)`%) e Palmeiras
 (`r round(p_campeao[["Palmeiras"]] * 100, 1)`%), enquanto o meio de tabela
-está de fato indefinido — cinco times (Internacional, Vitória, Mirassol,
+está de fato indefinido, cinco times (Internacional, Vitória, Mirassol,
 Grêmio e Vasco) têm entre 20% e 60% de chance de cair, sem nenhum
 "salvo" ou "condenado" entre eles.
 
@@ -561,8 +564,7 @@ e vem do calendário (quem tem mais jogos em casa entre os pendentes sai
 ganhando), não de uma mudança estrutural na disputa. As outras duas
 melhorias discutidas (desfalques por suspensão/lesão; times titulares vs.
 mistos/reserva) ficam propostas mas não implementadas, porque dependem de
-uma fonte de dados que o CSV atual não tem — ficam como próximo passo
-natural caso essa informação fique disponível.
+uma fonte de dados que o CSV atual não tem.
 
 Nenhum resultado deste relatório está codificado como número fixo: mudar
 os jogos em `data/raw/brasileirao_2026.csv` e rodar novamente
