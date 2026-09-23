@@ -445,10 +445,12 @@ Comparação para os times com maior chance de título (pergunta 1, modelo
 original):
 
 ```{r comparacao-h-campeao}
+# Os nomes dos times vem das colunas indexadas por nome (p_campeao[...]),
+# igual a `classificacao_simulada` -- por isso, sem uma coluna `time`
+# redundante, o time aparece só como nome de linha.
 times_campeao <- names(sort(p_campeao, decreasing = TRUE))[1:6]
 
 data.frame(
-  time = times_campeao,
   p_campeao_original = p_campeao[times_campeao],
   p_campeao_com_h = p_campeao_h[times_campeao]
 ) %>% arrange(desc(p_campeao_original))
@@ -461,7 +463,6 @@ original):
 times_rebaixado <- names(sort(p_rebaixado, decreasing = TRUE))[1:6]
 
 data.frame(
-  time = times_rebaixado,
   p_rebaixado_original = p_rebaixado[times_rebaixado],
   p_rebaixado_com_h = p_rebaixado_h[times_rebaixado]
 ) %>% arrange(desc(p_rebaixado_original))
