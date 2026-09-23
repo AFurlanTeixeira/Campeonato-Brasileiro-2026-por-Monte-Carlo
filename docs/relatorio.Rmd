@@ -198,10 +198,12 @@ limite superior mais honesto é $3/N$ (regra de três para zero eventos em
 
 # Pergunta 3 — Probabilidade de decisão por critério de desempate
 
-**Ambiguidade a resolver no texto final:** "decidido pelos critérios de
-desempate" pode significar (a) o título saiu empatado em pontos no topo, ou
-(b) *alguma* posição relevante (título ou última vaga de rebaixamento) saiu
-empatada em pontos. São leituras diferentes e merecem números separados.
+"Decidido pelos critérios de desempate" pode significar (a) o título saiu
+empatado em pontos no topo, ou (b) *alguma* posição relevante (título ou
+última vaga de rebaixamento) saiu empatada em pontos. **Decisão do grupo:**
+adotamos a leitura (a) — a pergunta se refere ao desempate que decide o
+título — como resposta oficial; a leitura (b) fica calculada abaixo só como
+referência.
 
 ```{r q3-desempate}
 p_empate_topo <- mean(empate_topo)
@@ -211,11 +213,14 @@ empate_16_17 <- posicoes_ordenadas_por_pontos[, 16] == posicoes_ordenadas_por_po
 p_empate_rebaixamento <- mean(empate_16_17)
 
 data.frame(
-  interpretacao = c("Empate no título (posição 1)", "Empate na última vaga de rebaixamento (16º-17º)"),
+  interpretacao = c("Empate no título (posição 1) — resposta oficial (a)", "Empate na última vaga de rebaixamento (16º-17º) — referência (b)"),
   probabilidade = c(p_empate_topo, p_empate_rebaixamento),
   erro_mc = erro_mc(c(p_empate_topo, p_empate_rebaixamento), N)
 )
 ```
+
+A probabilidade de o título ser decidido pelos critérios de desempate é
+**`r round(p_empate_topo * 100, 1)`%** (erro MC ±`r round(erro_mc(p_empate_topo, N) * 100, 2)` p.p.).
 
 # Pergunta 4 — Valor esperado de pontos do campeão
 
@@ -238,13 +243,20 @@ diferentes e não devem ser confundidas no texto final.
 
 # Pergunta 5 — Pontos para ≥90% de chance de título
 
-Para cada valor de pontos observado nas simulações, calculamos a proporção
-de vezes em que esse valor correspondeu ao campeão. Como essa proporção não
-é estritamente monótona (ruído de simulação, principalmente nos extremos
-com poucas observações), usamos o menor valor de pontos a partir do qual
-**todos** os valores maiores também têm proporção ≥ 90%.
+Assim como na pergunta 3, há duas leituras razoáveis e elas dão respostas
+**diferentes nas mesmas réplicas** (não é ruído de simulação), reportamos
+as duas.
 
-```{r q5-pontos-90-titulo}
+## Leitura A — menor pontuação que garante ≥90% empiricamente
+
+Para cada valor de pontos observado nas simulações, calculamos a proporção
+de vezes em que esse valor correspondeu ao campeão (olhando todos os times
+em todas as posições). Como essa proporção não é estritamente monótona
+(ruído de simulação, principalmente nos extremos com poucas observações),
+usamos o menor valor de pontos a partir do qual **todos** os valores
+maiores também têm proporção ≥ 90%.
+
+```{r q5-pontos-90-titulo-a}
 pontos_vetor <- as.vector(pontos_mat)
 campeao_vetor <- as.vector(posicao_mat == 1)
 
@@ -257,18 +269,38 @@ acima_do_limiar <- vapply(valores_pontos, function(x) {
   all(prop_campeao_por_pontos[chave] >= 0.90)
 }, logical(1))
 
-pontos_90_titulo <- min(valores_pontos[acima_do_limiar])
-cat("Pontos para >=90% de chance de título:", pontos_90_titulo, "\n")
+pontos_90_titulo_a <- min(valores_pontos[acima_do_limiar])
+cat("Leitura A — pontos para >=90% de chance de título:", pontos_90_titulo_a, "\n")
 
 data.frame(pontos = valores_pontos, prop_campeao = as.numeric(prop_campeao_por_pontos), n = as.numeric(n_por_pontos))
 ```
 
+## Leitura B — percentil 90 da pontuação do vice-campeão
+
+Outra forma de responder: que pontuação supera o 2º colocado em 90% das
+réplicas? Aqui olhamos só a distribuição de pontos de quem terminou em 2º
+lugar, não a de todos os times em todas as posições.
+
+```{r q5-pontos-90-titulo-b}
+pontos_vice <- pontos_mat[posicao_mat == 2]
+pontos_90_titulo_b <- as.numeric(quantile(pontos_vice, 0.90))
+cat("Leitura B — percentil 90 da pontuação do vice-campeão:", pontos_90_titulo_b, "\n")
+```
+
+As duas leituras dão respostas próximas, mas diferentes
+(`r pontos_90_titulo_a` vs. `r pontos_90_titulo_b` pontos), porque
+respondem perguntas ligeiramente distintas.
+
 # Pergunta 6 — Pontos para ≥95% de chance de escapar do rebaixamento
 
-Mesma lógica da pergunta anterior, trocando "foi campeão" por "não foi
-rebaixado" (posição < 17) e o limiar para 95%.
+Mesma ambiguidade da pergunta 5, mesmo tratamento: duas leituras.
 
-```{r q6-pontos-95-permanencia}
+## Leitura A — menor pontuação que garante ≥95% empiricamente
+
+Mesma lógica da leitura A da pergunta 5, trocando "foi campeão" por "não
+foi rebaixado" (posição < 17) e o limiar para 95%.
+
+```{r q6-pontos-95-permanencia-a}
 nao_rebaixado_vetor <- as.vector(posicao_mat < 17)
 
 prop_permanencia_por_pontos <- tapply(nao_rebaixado_vetor, pontos_vetor, mean)
@@ -278,9 +310,18 @@ acima_do_limiar_perm <- vapply(valores_pontos, function(x) {
   all(prop_permanencia_por_pontos[chave] >= 0.95)
 }, logical(1))
 
-pontos_95_permanencia <- min(valores_pontos[acima_do_limiar_perm])
-cat("Pontos para >=95% de chance de não ser rebaixado:", pontos_95_permanencia, "\n")
+pontos_95_permanencia_a <- min(valores_pontos[acima_do_limiar_perm])
+cat("Leitura A — pontos para >=95% de chance de não ser rebaixado:", pontos_95_permanencia_a, "\n")
 ```
+
+## Leitura B — percentil 95 da pontuação do 17º colocado
+
+```{r q6-pontos-95-permanencia-b}
+pontos_17 <- pontos_mat[posicao_mat == 17]
+pontos_95_permanencia_b <- as.numeric(quantile(pontos_17, 0.95))
+cat("Leitura B — percentil 95 da pontuação do 17º colocado:", pontos_95_permanencia_b, "\n")
+```
+
 
 # Variabilidade das estimativas: bootstrap de $\theta$ e $\phi$
 
@@ -353,6 +394,31 @@ $\lambda$ de mandante/visitante) preservaria o resto do pipeline sem
 alterações; alternativas mais custosas (θ/φ separados por condição de
 mandante/visitante) reduzem a base amostral por parâmetro pela metade e
 merecem ser cruzadas com os IC da seção de bootstrap antes de adotadas.
+
+## Fator de vantagem de mandante (proposta, não implementada)
+
+Uma forma de calibrar esse fator diretamente pelos dados: escolher $h$ tal
+que a razão entre os $\lambda$ ajustados reproduza a razão observada entre
+gols de mandante e de visitante nos jogos já disputados.
+
+$$
+h = \sqrt{\dfrac{\text{gols mandante (média)}}{\text{gols visitante (média)}}}
+$$
+
+```{r fator-mandante}
+h <- sqrt(mean(disputados$gols_mandante) / mean(disputados$gols_visitante))
+cat("h =", round(h, 3), "\n")
+```
+
+Com esse $h$, os $\lambda$ da simulação (ADR-001 em
+[`.ai/modelagem.md`](../.ai/modelagem.md)) passariam de
+`(theta_mandante + phi_visitante) / 2` e
+`(theta_visitante + phi_mandante) / 2` (implementados em
+`R/simulacao.R`) para `lambda_mandante * h` e `lambda_visitante / h` —
+muda só a etapa de simulação; `calcular_classificacao()` e o laço de Monte
+Carlo continuam iguais. **Decisão do grupo:** adotar essa calibração (ou
+outra), implementar em `R/simulacao.R` e comparar as respostas 1 e 2 com o
+modelo original usando o mesmo seed.
 
 # Conclusão
 

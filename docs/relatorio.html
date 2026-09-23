@@ -11,7 +11,7 @@
 
 <meta name="author" content="Nome dos integrantes do grupo" />
 
-<meta name="date" content="2026-09-22" />
+<meta name="date" content="2026-09-23" />
 
 <title>Predição do Campeonato Brasileiro 2026 por Monte Carlo</title>
 
@@ -1483,7 +1483,7 @@ border-radius: 0px;
 Monte Carlo</h1>
 <h3 class="subtitle">Laboratório 1 — ME524, Unicamp (2026)</h3>
 <h4 class="author">Nome dos integrantes do grupo</h4>
-<h4 class="date">2026-09-22</h4>
+<h4 class="date">2026-09-23</h4>
 
 </div>
 
@@ -1747,11 +1747,12 @@ rodadas. Para esses casos um limite superior mais honesto é <span class="math i
 <div id="pergunta-3-probabilidade-de-decisão-por-critério-de-desempate" class="section level1" number="10">
 <h1><span class="header-section-number">10</span> Pergunta 3 —
 Probabilidade de decisão por critério de desempate</h1>
-<p><strong>Ambiguidade a resolver no texto final:</strong> “decidido
-pelos critérios de desempate” pode significar (a) o título saiu empatado
-em pontos no topo, ou (b) <em>alguma</em> posição relevante (título ou
-última vaga de rebaixamento) saiu empatada em pontos. São leituras
-diferentes e merecem números separados.</p>
+<p>“Decidido pelos critérios de desempate” pode significar (a) o título
+saiu empatado em pontos no topo, ou (b) <em>alguma</em> posição
+relevante (título ou última vaga de rebaixamento) saiu empatada em
+pontos. <strong>Decisão do grupo:</strong> adotamos a leitura (a) — a
+pergunta se refere ao desempate que decide o título — como resposta
+oficial; a leitura (b) fica calculada abaixo só como referência.</p>
 <pre class="r"><code>p_empate_topo &lt;- mean(empate_topo)
 
 posicoes_ordenadas_por_pontos &lt;- t(apply(pontos_mat, 1, function(p) sort(p, decreasing = TRUE)))
@@ -1759,13 +1760,18 @@ empate_16_17 &lt;- posicoes_ordenadas_por_pontos[, 16] == posicoes_ordenadas_por
 p_empate_rebaixamento &lt;- mean(empate_16_17)
 
 data.frame(
-  interpretacao = c(&quot;Empate no título (posição 1)&quot;, &quot;Empate na última vaga de rebaixamento (16º-17º)&quot;),
+  interpretacao = c(&quot;Empate no título (posição 1) — resposta oficial (a)&quot;, &quot;Empate na última vaga de rebaixamento (16º-17º) — referência (b)&quot;),
   probabilidade = c(p_empate_topo, p_empate_rebaixamento),
   erro_mc = erro_mc(c(p_empate_topo, p_empate_rebaixamento), N)
 )</code></pre>
-<pre><code>##                                     interpretacao probabilidade     erro_mc
-## 1                    Empate no título (posição 1)        0.0684 0.002524311
-## 2 Empate na última vaga de rebaixamento (16º-17º)        0.2000 0.004000000</code></pre>
+<pre><code>##                                                      interpretacao
+## 1              Empate no título (posição 1) — resposta oficial (a)
+## 2 Empate na última vaga de rebaixamento (16º-17º) — referência (b)
+##   probabilidade     erro_mc
+## 1        0.0684 0.002524311
+## 2        0.2000 0.004000000</code></pre>
+<p>A probabilidade de o título ser decidido pelos critérios de desempate
+é <strong>6.8%</strong> (erro MC ±0.25 p.p.).</p>
 </div>
 <div id="pergunta-4-valor-esperado-de-pontos-do-campeão" class="section level1" number="11">
 <h1><span class="header-section-number">11</span> Pergunta 4 — Valor
@@ -1791,12 +1797,19 @@ texto final.</p>
 <div id="pergunta-5-pontos-para-90-de-chance-de-título" class="section level1" number="12">
 <h1><span class="header-section-number">12</span> Pergunta 5 — Pontos
 para ≥90% de chance de título</h1>
+<p>Assim como na pergunta 3, há duas leituras razoáveis e elas dão
+respostas <strong>diferentes nas mesmas réplicas</strong> (não é ruído
+de simulação), reportamos as duas.</p>
+<div id="leitura-a-menor-pontuação-que-garante-90-empiricamente" class="section level2" number="12.1">
+<h2><span class="header-section-number">12.1</span> Leitura A — menor
+pontuação que garante ≥90% empiricamente</h2>
 <p>Para cada valor de pontos observado nas simulações, calculamos a
-proporção de vezes em que esse valor correspondeu ao campeão. Como essa
-proporção não é estritamente monótona (ruído de simulação,
-principalmente nos extremos com poucas observações), usamos o menor
-valor de pontos a partir do qual <strong>todos</strong> os valores
-maiores também têm proporção ≥ 90%.</p>
+proporção de vezes em que esse valor correspondeu ao campeão (olhando
+todos os times em todas as posições). Como essa proporção não é
+estritamente monótona (ruído de simulação, principalmente nos extremos
+com poucas observações), usamos o menor valor de pontos a partir do qual
+<strong>todos</strong> os valores maiores também têm proporção ≥
+90%.</p>
 <pre class="r"><code>pontos_vetor &lt;- as.vector(pontos_mat)
 campeao_vetor &lt;- as.vector(posicao_mat == 1)
 
@@ -1809,9 +1822,9 @@ acima_do_limiar &lt;- vapply(valores_pontos, function(x) {
   all(prop_campeao_por_pontos[chave] &gt;= 0.90)
 }, logical(1))
 
-pontos_90_titulo &lt;- min(valores_pontos[acima_do_limiar])
-cat(&quot;Pontos para &gt;=90% de chance de título:&quot;, pontos_90_titulo, &quot;\n&quot;)</code></pre>
-<pre><code>## Pontos para &gt;=90% de chance de título: 79</code></pre>
+pontos_90_titulo_a &lt;- min(valores_pontos[acima_do_limiar])
+cat(&quot;Leitura A — pontos para &gt;=90% de chance de título:&quot;, pontos_90_titulo_a, &quot;\n&quot;)</code></pre>
+<pre><code>## Leitura A — pontos para &gt;=90% de chance de título: 79</code></pre>
 <pre class="r"><code>data.frame(pontos = valores_pontos, prop_campeao = as.numeric(prop_campeao_por_pontos), n = as.numeric(n_por_pontos))</code></pre>
 <pre><code>##    pontos prop_campeao    n
 ## 1      18  0.000000000    4
@@ -1884,11 +1897,29 @@ cat(&quot;Pontos para &gt;=90% de chance de título:&quot;, pontos_90_titulo, &q
 ## 68     85  1.000000000   71
 ## 69     87  1.000000000   12</code></pre>
 </div>
+<div id="leitura-b-percentil-90-da-pontuação-do-vice-campeão" class="section level2" number="12.2">
+<h2><span class="header-section-number">12.2</span> Leitura B —
+percentil 90 da pontuação do vice-campeão</h2>
+<p>Outra forma de responder: que pontuação supera o 2º colocado em 90%
+das réplicas? Aqui olhamos só a distribuição de pontos de quem terminou
+em 2º lugar, não a de todos os times em todas as posições.</p>
+<pre class="r"><code>pontos_vice &lt;- pontos_mat[posicao_mat == 2]
+pontos_90_titulo_b &lt;- as.numeric(quantile(pontos_vice, 0.90))
+cat(&quot;Leitura B — percentil 90 da pontuação do vice-campeão:&quot;, pontos_90_titulo_b, &quot;\n&quot;)</code></pre>
+<pre><code>## Leitura B — percentil 90 da pontuação do vice-campeão: 76</code></pre>
+<p>As duas leituras dão respostas próximas, mas diferentes (79 vs. 76
+pontos), porque respondem perguntas ligeiramente distintas.</p>
+</div>
+</div>
 <div id="pergunta-6-pontos-para-95-de-chance-de-escapar-do-rebaixamento" class="section level1" number="13">
 <h1><span class="header-section-number">13</span> Pergunta 6 — Pontos
 para ≥95% de chance de escapar do rebaixamento</h1>
-<p>Mesma lógica da pergunta anterior, trocando “foi campeão” por “não
-foi rebaixado” (posição &lt; 17) e o limiar para 95%.</p>
+<p>Mesma ambiguidade da pergunta 5, mesmo tratamento: duas leituras.</p>
+<div id="leitura-a-menor-pontuação-que-garante-95-empiricamente" class="section level2" number="13.1">
+<h2><span class="header-section-number">13.1</span> Leitura A — menor
+pontuação que garante ≥95% empiricamente</h2>
+<p>Mesma lógica da leitura A da pergunta 5, trocando “foi campeão” por
+“não foi rebaixado” (posição &lt; 17) e o limiar para 95%.</p>
 <pre class="r"><code>nao_rebaixado_vetor &lt;- as.vector(posicao_mat &lt; 17)
 
 prop_permanencia_por_pontos &lt;- tapply(nao_rebaixado_vetor, pontos_vetor, mean)
@@ -1898,9 +1929,18 @@ acima_do_limiar_perm &lt;- vapply(valores_pontos, function(x) {
   all(prop_permanencia_por_pontos[chave] &gt;= 0.95)
 }, logical(1))
 
-pontos_95_permanencia &lt;- min(valores_pontos[acima_do_limiar_perm])
-cat(&quot;Pontos para &gt;=95% de chance de não ser rebaixado:&quot;, pontos_95_permanencia, &quot;\n&quot;)</code></pre>
-<pre><code>## Pontos para &gt;=95% de chance de não ser rebaixado: 45</code></pre>
+pontos_95_permanencia_a &lt;- min(valores_pontos[acima_do_limiar_perm])
+cat(&quot;Leitura A — pontos para &gt;=95% de chance de não ser rebaixado:&quot;, pontos_95_permanencia_a, &quot;\n&quot;)</code></pre>
+<pre><code>## Leitura A — pontos para &gt;=95% de chance de não ser rebaixado: 45</code></pre>
+</div>
+<div id="leitura-b-percentil-95-da-pontuação-do-17º-colocado" class="section level2" number="13.2">
+<h2><span class="header-section-number">13.2</span> Leitura B —
+percentil 95 da pontuação do 17º colocado</h2>
+<pre class="r"><code>pontos_17 &lt;- pontos_mat[posicao_mat == 17]
+pontos_95_permanencia_b &lt;- as.numeric(quantile(pontos_17, 0.95))
+cat(&quot;Leitura B — percentil 95 da pontuação do 17º colocado:&quot;, pontos_95_permanencia_b, &quot;\n&quot;)</code></pre>
+<pre><code>## Leitura B — percentil 95 da pontuação do 17º colocado: 44</code></pre>
+</div>
 </div>
 <div id="variabilidade-das-estimativas-bootstrap-de-theta-e-phi" class="section level1" number="14">
 <h1><span class="header-section-number">14</span> Variabilidade das
@@ -1993,6 +2033,30 @@ alternativas mais custosas (θ/φ separados por condição de
 mandante/visitante) reduzem a base amostral por parâmetro pela metade e
 merecem ser cruzadas com os IC da seção de bootstrap antes de
 adotadas.</p>
+<div id="fator-de-vantagem-de-mandante-proposta-não-implementada" class="section level2" number="15.1">
+<h2><span class="header-section-number">15.1</span> Fator de vantagem de
+mandante (proposta, não implementada)</h2>
+<p>Uma forma de calibrar esse fator diretamente pelos dados: escolher
+<span class="math inline">\(h\)</span> tal que a razão entre os <span class="math inline">\(\lambda\)</span> ajustados reproduza a razão
+observada entre gols de mandante e de visitante nos jogos já
+disputados.</p>
+<p><span class="math display">\[
+h = \sqrt{\dfrac{\text{gols mandante (média)}}{\text{gols visitante
+(média)}}}
+\]</span></p>
+<pre class="r"><code>h &lt;- sqrt(mean(disputados$gols_mandante) / mean(disputados$gols_visitante))
+cat(&quot;h =&quot;, round(h, 3), &quot;\n&quot;)</code></pre>
+<pre><code>## h = 1.145</code></pre>
+<p>Com esse <span class="math inline">\(h\)</span>, os <span class="math inline">\(\lambda\)</span> da simulação (ADR-001 em <a href="../.ai/modelagem.md"><code>.ai/modelagem.md</code></a>) passariam
+de <code>(theta_mandante + phi_visitante) / 2</code> e
+<code>(theta_visitante + phi_mandante) / 2</code> (implementados em
+<code>R/simulacao.R</code>) para <code>lambda_mandante * h</code> e
+<code>lambda_visitante / h</code> — muda só a etapa de simulação;
+<code>calcular_classificacao()</code> e o laço de Monte Carlo continuam
+iguais. <strong>Decisão do grupo:</strong> adotar essa calibração (ou
+outra), implementar em <code>R/simulacao.R</code> e comparar as
+respostas 1 e 2 com o modelo original usando o mesmo seed.</p>
+</div>
 </div>
 <div id="conclusão" class="section level1" number="16">
 <h1><span class="header-section-number">16</span> Conclusão</h1>
