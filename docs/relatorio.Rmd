@@ -526,4 +526,45 @@ para escolher qual $\lambda$ usar.
 
 # Conclusão
 
-A definir
+O modelo de gols por Poisson do enunciado, com $\theta$/$\phi$ estimados
+por médias simples e simulação Monte Carlo com
+`r format(N, big.mark = ".", decimal.mark = ",")` réplicas, é suficiente
+para responder às seis perguntas do laboratório com erro Monte Carlo
+pequeno (tipicamente abaixo de 1 ponto percentual). O resultado central é
+que a temporada já está bastante decidida na parte de cima da tabela: o
+título é uma disputa quase exclusiva entre Flamengo
+(`r round(p_campeao[["Flamengo"]] * 100, 1)`%) e Palmeiras
+(`r round(p_campeao[["Palmeiras"]] * 100, 1)`%), enquanto o meio de tabela
+está de fato indefinido — cinco times (Internacional, Vitória, Mirassol,
+Grêmio e Vasco) têm entre 20% e 60% de chance de cair, sem nenhum
+"salvo" ou "condenado" entre eles.
+
+Duas perguntas (3, sobre desempate, e 5/6, sobre pontuação-limite) tinham
+mais de uma leitura estatisticamente razoável e igualmente válida diante
+do enunciado; em vez de escolher uma leitura silenciosamente, reportamos
+as duas onde a ambiguidade persistiu (pergunta 5:
+`r pontos_90_titulo_a` vs. `r pontos_90_titulo_b` pontos; pergunta 6:
+`r pontos_95_permanencia_a` vs. `r pontos_95_permanencia_b` pontos) e
+documentamos qual foi adotada como oficial onde o grupo decidiu (pergunta
+3, leitura (a): `r round(p_empate_topo * 100, 1)`% de chance de o título
+ser decidido no desempate). O bootstrap mostra que essa incerteza de
+simulação é pequena perto da incerteza de estimação de $\theta$/$\phi$
+(times com poucos jogos disputados, como Palmeiras e Atlético-MG, têm
+IC bem mais largos) — incerteza que, por desenho do enunciado, não
+propaga para as respostas 1 e 2.
+
+A limitação mais relevante do modelo original é tratar mandante e
+visitante como equivalentes, quando os dados mostram o contrário. A
+atividade extra implementou essa correção (fator $h \approx$
+`r round(h, 3)`) e mostrou que o efeito nas respostas é real mas modesto,
+e vem do calendário (quem tem mais jogos em casa entre os pendentes sai
+ganhando), não de uma mudança estrutural na disputa. As outras duas
+melhorias discutidas (desfalques por suspensão/lesão; times titulares vs.
+mistos/reserva) ficam propostas mas não implementadas, porque dependem de
+uma fonte de dados que o CSV atual não tem — ficam como próximo passo
+natural caso essa informação fique disponível.
+
+Nenhum resultado deste relatório está codificado como número fixo: mudar
+os jogos em `data/raw/brasileirao_2026.csv` e rodar novamente
+(`rmarkdown::render()`) recalcula tudo, das estimativas de $\theta$/$\phi$
+até as respostas finais.
