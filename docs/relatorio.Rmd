@@ -85,8 +85,7 @@ disputados %>%
 
 O mandante marca mais e vence com mais frequência do que o visitante, mas os
 $\lambda$ do modelo (calculados a seguir) saem parecidos para os dois
-lados — o enunciado pede exatamente esse modelo; a seção
-["Atividade extra"](#atividade-extra) retoma esse ponto.
+lados; a seção ["Atividade extra"](#atividade-extra) retoma esse ponto.
 
 # Classificação atual
 
@@ -138,7 +137,7 @@ for (r in seq_len(N)) {
 Consolidando as `r format(N, big.mark = ".", decimal.mark = ",")` réplicas em uma única tabela:
 pontos médios, posição média e as probabilidades de título e rebaixamento
 de cada time (as mesmas das perguntas 1 e 2, lado a lado). A ordenação é
-pela posição média — não é a classificação de uma réplica específica, é a
+pela posição média, não é a classificação de uma réplica específica, é a
 média sobre todas elas.
 
 ```{r classificacao-simulada}
@@ -191,7 +190,7 @@ resultado_q2
 ```
 
 Quando `p_rebaixado` é 0 ou 1 em todas as `N` réplicas, o erro Monte Carlo
-acima também sai 0 — isso não significa certeza, só que o evento não
+acima também sai 0; isso não significa certeza, só que o evento não
 ocorreu (ou sempre ocorreu) nas réplicas rodadas. Para esses casos um
 limite superior mais honesto é $3/N$ (regra de três para zero eventos em
 `N` tentativas de Bernoulli).
@@ -201,8 +200,8 @@ limite superior mais honesto é $3/N$ (regra de três para zero eventos em
 "Decidido pelos critérios de desempate" pode significar (a) o título saiu
 empatado em pontos no topo, ou (b) *alguma* posição relevante (título ou
 última vaga de rebaixamento) saiu empatada em pontos. **Decisão do grupo:**
-adotamos a leitura (a) — a pergunta se refere ao desempate que decide o
-título — como resposta oficial; a leitura (b) fica calculada abaixo só como
+adotamos a leitura (a), a pergunta se refere ao desempate que decide o
+título como resposta oficial; a leitura (b) fica calculada abaixo só como
 referência.
 
 ```{r q3-desempate}
@@ -238,14 +237,11 @@ cat("Intervalo de predição 95% (entre réplicas):", intervalo_predicao, "\n")
 ```
 
 O erro Monte Carlo acima é sobre a *média*; o intervalo de predição descreve
-a variabilidade dos pontos do campeão *entre réplicas* — são coisas
-diferentes e não devem ser confundidas no texto final.
+a variabilidade dos pontos do campeão *entre réplicas*.
 
 # Pergunta 5 — Pontos para ≥90% de chance de título
 
-Assim como na pergunta 3, há duas leituras razoáveis e elas dão respostas
-**diferentes nas mesmas réplicas** (não é ruído de simulação), reportamos
-as duas.
+Igual à pergunta 3, adotamos duas leituras possíveis:
 
 ## Leitura A — menor pontuação que garante ≥90% empiricamente
 
@@ -373,10 +369,10 @@ ggplot(grafico_dados, aes(x = time, y = medio, ymin = li, ymax = ls)) +
 ```
 
 Com ~27–29 jogos por time, os intervalos de confiança são relativamente
-largos — vale discutir no texto final quais times têm as estimativas mais
-instáveis (IC mais largo) e o que isso significa para a confiabilidade das
+largos, vale discutir quais times têm as estimativas mais instáveis
+(IC mais largo) e o que isso significa para a confiabilidade das
 respostas 1 e 2. Importante: essa incerteza **não propaga** para a
-simulação Monte Carlo da seção anterior — lá, $\theta$/$\phi$ entram como
+simulação Monte Carlo da seção anterior. Lá, $\theta$/$\phi$ entram como
 constantes conhecidas, então `p_campeao`/`p_rebaixado` carregam só erro
 Monte Carlo, não erro de estimação. Propagar exigiria reestimar
 $\theta$/$\phi$ a cada réplica (fora do escopo pedido pelo enunciado).
@@ -411,14 +407,111 @@ cat("h =", round(h, 3), "\n")
 ```
 
 Com esse $h$, os $\lambda$ da simulação (ADR-001 em
-[`.ai/modelagem.md`](../.ai/modelagem.md)) passariam de
+[`.ai/modelagem.md`](../.ai/modelagem.md)) passam de
 `(theta_mandante + phi_visitante) / 2` e
-`(theta_visitante + phi_mandante) / 2` (implementados em
-`R/simulacao.R`) para `lambda_mandante * h` e `lambda_visitante / h` —
-muda só a etapa de simulação; `calcular_classificacao()` e o laço de Monte
-Carlo continuam iguais. **Decisão do grupo:** adotar essa calibração (ou
-outra), implementar em `R/simulacao.R` e comparar as respostas 1 e 2 com o
-modelo original usando o mesmo seed.
+`(theta_visitante + phi_mandante) / 2` para `lambda_mandante * h` e
+`lambda_visitante / h`. **Implementado** como o argumento opcional `h` de
+`simular_jogo()`/`simular_temporada()` (`R/simulacao.R`), com `h = 1` como
+padrão, por isso as perguntas 1 a 6 acima, que não passam `h`, continuam
+usando exatamente o modelo original do enunciado.
+
+## Simulação com o fator de mandante
+
+Repetimos a simulação Monte Carlo (mesmo `N`, mesmos seeds por réplica,
+só a etapa `simular_temporada()` passa a receber `h`) para medir o efeito
+da calibração nas respostas 1 e 2:
+
+```{r monte-carlo-h, cache=TRUE}
+pontos_mat_h <- matrix(0, nrow = N, ncol = length(times), dimnames = list(NULL, times))
+posicao_mat_h <- matrix(0L, nrow = N, ncol = length(times), dimnames = list(NULL, times))
+
+for (r in seq_len(N)) {
+  simulados_h <- simular_temporada(pendentes, parametros, seed = r, h = h)
+  tabela_h <- calcular_classificacao(rbind(disputados, simulados_h))
+
+  pontos_mat_h[r, ] <- tabela_h[times, "pontos"]
+  posicao_mat_h[r, ] <- tabela_h[times, "posicao"]
+}
+
+p_campeao_h <- colMeans(posicao_mat_h == 1)
+p_rebaixado_h <- colMeans(posicao_mat_h >= 17)
+```
+
+Comparação para os times com maior chance de título ou de rebaixamento
+(perguntas 1 e 2, modelo original):
+
+```{r comparacao-h}
+times_interesse <- union(
+  names(sort(p_campeao, decreasing = TRUE))[1:6],
+  names(sort(p_rebaixado, decreasing = TRUE))[1:6]
+)
+
+comparacao_h <- data.frame(
+  time = times_interesse,
+  p_campeao_original = p_campeao[times_interesse],
+  p_campeao_com_h = p_campeao_h[times_interesse],
+  p_rebaixado_original = p_rebaixado[times_interesse],
+  p_rebaixado_com_h = p_rebaixado_h[times_interesse]
+) %>% arrange(desc(p_campeao_original))
+
+comparacao_h
+```
+
+```{r jogos-casa-fora-restantes, echo=FALSE}
+jogos_casa_restantes <- table(pendentes$time_mandante)[c("Palmeiras", "Mirassol")]
+jogos_fora_restantes <- table(pendentes$time_visitante)[c("Palmeiras", "Mirassol")]
+```
+
+O efeito é pequeno, mas sistemático, e vem do calendário de jogos que
+faltam, não de um viés geral do fator $h$: como $h$ só altera o resultado
+de cada jogo individual (mais gols para quem joga em casa, menos para o
+visitante), times com mais jogos em casa do que fora entre os
+`r sum(!is.na(pendentes$rodada))` jogos pendentes saem ganhando, e o
+oposto vale para quem tem mais jogos fora. Entre os
+`r nrow(pendentes)` jogos pendentes, o Palmeiras, por exemplo, tem
+`r jogos_casa_restantes[["Palmeiras"]]` jogos em casa contra
+`r jogos_fora_restantes[["Palmeiras"]]` fora entre os pendentes, e sua
+`P(título)` sobe de `r round(p_campeao[["Palmeiras"]] * 100, 1)`% para
+`r round(p_campeao_h[["Palmeiras"]] * 100, 1)`%, o ganho vem do Flamengo
+(5 jogos em casa, 5 fora — calendário equilibrado), cuja `P(título)` cai
+de `r round(p_campeao[["Flamengo"]] * 100, 1)`% para
+`r round(p_campeao_h[["Flamengo"]] * 100, 1)`%, já que o título é
+disputado quase só entre os dois. Na ponta do rebaixamento, o Mirassol
+(`r jogos_casa_restantes[["Mirassol"]]` jogos em casa contra
+`r jogos_fora_restantes[["Mirassol"]]` fora) tem mais jogos fora do que em
+casa entre os pendentes, e sua `P(rebaixamento)` sobe de
+`r round(p_rebaixado[["Mirassol"]] * 100, 1)`% para
+`r round(p_rebaixado_h[["Mirassol"]] * 100, 1)`%. O valor esperado de
+pontos do campeão (pergunta 4) quase não muda:
+`r round(mean(pontos_mat[posicao_mat == 1]), 1)` pontos no modelo
+original contra `r round(mean(pontos_mat_h[posicao_mat_h == 1]), 1)` com
+$h$.
+
+## Outra melhoria no modelo: desfalques por suspensão/lesão
+
+Uma limitação que o fator $h$ não resolve, e que também não está
+implementada, é que o modelo trata cada time como se tivesse sempre seu
+elenco completo disponível. Times reais perdem jogadores-chave por cartão
+(suspensão) ou contusão de uma rodada para outra, o que muda sua força
+ofensiva/defensiva pontualmente, algo que θ/ϕ (médias sobre todos os jogos
+já disputados) não capturam. Incorporar isso exigiria dados que o CSV
+atual (`data/raw/brasileirao_2026.csv`, só placares) não tem, escalação
+ou lista de desfalques por rodada, e uma forma de traduzir "fulano está
+fora" em um ajuste de $\lambda$ (ex.: um multiplicador por time e rodada,
+proporcional à importância dos jogadores desfalcados, aplicado como um
+segundo fator ao lado de $h$).
+
+Uma versão mais simples da mesma ideia, que dispensa lista de desfalque
+jogador a jogador: classificar cada jogo já disputado em "time titular
+completo" ou "misto/reserva" (situação comum quando o time também disputa
+copa nacional/continental e poupa titulares em jogos considerados menos
+decisivos do Brasileirão) e comparar vitórias/derrotas, gols marcados e
+gols sofridos entre as duas situações, de forma parecida com a
+comparação mandante/visitante feita acima para o fator $h$. Times com
+diferença grande entre as duas situações teriam um $\theta$/$\phi$ por
+situação, em vez de um valor único; a simulação passaria a precisar saber
+se cada jogo pendente será disputado por um time "completo" ou "misto"
+para escolher qual $\lambda$ usar.
 
 # Conclusão
 
