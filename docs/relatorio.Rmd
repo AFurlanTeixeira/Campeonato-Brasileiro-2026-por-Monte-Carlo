@@ -268,7 +268,11 @@ acima_do_limiar <- vapply(valores_pontos, function(x) {
 pontos_90_titulo_a <- min(valores_pontos[acima_do_limiar])
 cat("Leitura A — pontos para >=90% de chance de título:", pontos_90_titulo_a, "\n")
 
-data.frame(pontos = valores_pontos, prop_campeao = as.numeric(prop_campeao_por_pontos), n = as.numeric(n_por_pontos))
+data.frame(
+  pontos = valores_pontos,
+  prop_campeao = as.numeric(prop_campeao_por_pontos),
+  n = as.numeric(n_por_pontos)
+) %>% arrange(desc(prop_campeao))
 ```
 
 ## Leitura B — percentil 90 da pontuação do vice-campeão
@@ -437,24 +441,30 @@ p_campeao_h <- colMeans(posicao_mat_h == 1)
 p_rebaixado_h <- colMeans(posicao_mat_h >= 17)
 ```
 
-Comparação para os times com maior chance de título ou de rebaixamento
-(perguntas 1 e 2, modelo original):
+Comparação para os times com maior chance de título (pergunta 1, modelo
+original):
 
-```{r comparacao-h}
-times_interesse <- union(
-  names(sort(p_campeao, decreasing = TRUE))[1:6],
-  names(sort(p_rebaixado, decreasing = TRUE))[1:6]
-)
+```{r comparacao-h-campeao}
+times_campeao <- names(sort(p_campeao, decreasing = TRUE))[1:6]
 
-comparacao_h <- data.frame(
-  time = times_interesse,
-  p_campeao_original = p_campeao[times_interesse],
-  p_campeao_com_h = p_campeao_h[times_interesse],
-  p_rebaixado_original = p_rebaixado[times_interesse],
-  p_rebaixado_com_h = p_rebaixado_h[times_interesse]
+data.frame(
+  time = times_campeao,
+  p_campeao_original = p_campeao[times_campeao],
+  p_campeao_com_h = p_campeao_h[times_campeao]
 ) %>% arrange(desc(p_campeao_original))
+```
 
-comparacao_h
+E para os times com maior chance de rebaixamento (pergunta 2, modelo
+original):
+
+```{r comparacao-h-rebaixado}
+times_rebaixado <- names(sort(p_rebaixado, decreasing = TRUE))[1:6]
+
+data.frame(
+  time = times_rebaixado,
+  p_rebaixado_original = p_rebaixado[times_rebaixado],
+  p_rebaixado_com_h = p_rebaixado_h[times_rebaixado]
+) %>% arrange(desc(p_rebaixado_original))
 ```
 
 ```{r jogos-casa-fora-restantes, echo=FALSE}

@@ -1821,77 +1821,81 @@ acima_do_limiar &lt;- vapply(valores_pontos, function(x) {
 pontos_90_titulo_a &lt;- min(valores_pontos[acima_do_limiar])
 cat(&quot;Leitura A — pontos para &gt;=90% de chance de título:&quot;, pontos_90_titulo_a, &quot;\n&quot;)</code></pre>
 <pre><code>## Leitura A — pontos para &gt;=90% de chance de título: 79</code></pre>
-<pre class="r"><code>data.frame(pontos = valores_pontos, prop_campeao = as.numeric(prop_campeao_por_pontos), n = as.numeric(n_por_pontos))</code></pre>
+<pre class="r"><code>data.frame(
+  pontos = valores_pontos,
+  prop_campeao = as.numeric(prop_campeao_por_pontos),
+  n = as.numeric(n_por_pontos)
+) %&gt;% arrange(desc(prop_campeao))</code></pre>
 <pre><code>##    pontos prop_campeao    n
-## 1      18  0.000000000    4
-## 2      19  0.000000000   24
-## 3      20  0.000000000   48
-## 4      21  0.000000000   98
-## 5      22  0.000000000  158
-## 6      23  0.000000000  315
-## 7      24  0.000000000  407
-## 8      25  0.000000000  596
-## 9      26  0.000000000  762
-## 10     27  0.000000000  954
-## 11     28  0.000000000 1167
-## 12     29  0.000000000 1281
-## 13     30  0.000000000 1493
-## 14     31  0.000000000 1561
-## 15     32  0.000000000 1687
-## 16     33  0.000000000 1763
-## 17     34  0.000000000 1922
-## 18     35  0.000000000 2102
-## 19     36  0.000000000 2298
-## 20     37  0.000000000 2742
-## 21     38  0.000000000 3161
-## 22     39  0.000000000 3807
-## 23     40  0.000000000 4438
-## 24     41  0.000000000 4726
-## 25     42  0.000000000 5555
-## 26     43  0.000000000 5917
-## 27     44  0.000000000 6318
-## 28     45  0.000000000 6445
-## 29     46  0.000000000 6935
-## 30     47  0.000000000 6772
-## 31     48  0.000000000 7275
-## 32     49  0.000000000 7066
-## 33     50  0.000000000 7277
-## 34     51  0.000000000 6945
-## 35     52  0.000000000 6917
-## 36     53  0.000000000 6311
-## 37     54  0.000000000 6176
-## 38     55  0.000000000 5841
-## 39     56  0.000000000 5370
-## 40     57  0.000000000 5272
-## 41     58  0.000000000 4951
-## 42     59  0.000000000 4689
-## 43     60  0.000000000 4514
-## 44     61  0.000000000 4169
-## 45     62  0.000000000 3938
-## 46     63  0.000000000 3512
-## 47     64  0.000000000 3298
-## 48     65  0.000000000 3042
-## 49     66  0.000000000 2537
-## 50     67  0.003856041 2334
-## 51     68  0.013895322 2159
-## 52     69  0.030425963 1972
-## 53     70  0.091603053 1834
-## 54     71  0.158953722 1988
-## 55     72  0.251794872 1950
-## 56     73  0.358490566 1961
-## 57     74  0.475956820 2038
-## 58     75  0.583693305 1852
-## 59     76  0.694652099 1739
-## 60     77  0.789699571 1631
-## 61     78  0.855624446 1129
-## 62     79  0.911266201 1003
-## 63     80  0.956636005  761
-## 64     81  0.968446602  412
-## 65     82  0.971751412  354
-## 66     83  0.993865031  163
-## 67     84  0.987654321   81
-## 68     85  1.000000000   71
-## 69     87  1.000000000   12</code></pre>
+## 1      85  1.000000000   71
+## 2      87  1.000000000   12
+## 3      83  0.993865031  163
+## 4      84  0.987654321   81
+## 5      82  0.971751412  354
+## 6      81  0.968446602  412
+## 7      80  0.956636005  761
+## 8      79  0.911266201 1003
+## 9      78  0.855624446 1129
+## 10     77  0.789699571 1631
+## 11     76  0.694652099 1739
+## 12     75  0.583693305 1852
+## 13     74  0.475956820 2038
+## 14     73  0.358490566 1961
+## 15     72  0.251794872 1950
+## 16     71  0.158953722 1988
+## 17     70  0.091603053 1834
+## 18     69  0.030425963 1972
+## 19     68  0.013895322 2159
+## 20     67  0.003856041 2334
+## 21     18  0.000000000    4
+## 22     19  0.000000000   24
+## 23     20  0.000000000   48
+## 24     21  0.000000000   98
+## 25     22  0.000000000  158
+## 26     23  0.000000000  315
+## 27     24  0.000000000  407
+## 28     25  0.000000000  596
+## 29     26  0.000000000  762
+## 30     27  0.000000000  954
+## 31     28  0.000000000 1167
+## 32     29  0.000000000 1281
+## 33     30  0.000000000 1493
+## 34     31  0.000000000 1561
+## 35     32  0.000000000 1687
+## 36     33  0.000000000 1763
+## 37     34  0.000000000 1922
+## 38     35  0.000000000 2102
+## 39     36  0.000000000 2298
+## 40     37  0.000000000 2742
+## 41     38  0.000000000 3161
+## 42     39  0.000000000 3807
+## 43     40  0.000000000 4438
+## 44     41  0.000000000 4726
+## 45     42  0.000000000 5555
+## 46     43  0.000000000 5917
+## 47     44  0.000000000 6318
+## 48     45  0.000000000 6445
+## 49     46  0.000000000 6935
+## 50     47  0.000000000 6772
+## 51     48  0.000000000 7275
+## 52     49  0.000000000 7066
+## 53     50  0.000000000 7277
+## 54     51  0.000000000 6945
+## 55     52  0.000000000 6917
+## 56     53  0.000000000 6311
+## 57     54  0.000000000 6176
+## 58     55  0.000000000 5841
+## 59     56  0.000000000 5370
+## 60     57  0.000000000 5272
+## 61     58  0.000000000 4951
+## 62     59  0.000000000 4689
+## 63     60  0.000000000 4514
+## 64     61  0.000000000 4169
+## 65     62  0.000000000 3938
+## 66     63  0.000000000 3512
+## 67     64  0.000000000 3298
+## 68     65  0.000000000 3042
+## 69     66  0.000000000 2537</code></pre>
 </div>
 <div id="leitura-b-percentil-90-da-pontuação-do-vice-campeão" class="section level2" number="12.2">
 <h2><span class="header-section-number">12.2</span> Leitura B —
@@ -2073,48 +2077,38 @@ for (r in seq_len(N)) {
 
 p_campeao_h &lt;- colMeans(posicao_mat_h == 1)
 p_rebaixado_h &lt;- colMeans(posicao_mat_h &gt;= 17)</code></pre>
-<p>Comparação para os times com maior chance de título ou de
-rebaixamento (perguntas 1 e 2, modelo original):</p>
-<pre class="r"><code>times_interesse &lt;- union(
-  names(sort(p_campeao, decreasing = TRUE))[1:6],
-  names(sort(p_rebaixado, decreasing = TRUE))[1:6]
-)
+<p>Comparação para os times com maior chance de título (pergunta 1,
+modelo original):</p>
+<pre class="r"><code>times_campeao &lt;- names(sort(p_campeao, decreasing = TRUE))[1:6]
 
-comparacao_h &lt;- data.frame(
-  time = times_interesse,
-  p_campeao_original = p_campeao[times_interesse],
-  p_campeao_com_h = p_campeao_h[times_interesse],
-  p_rebaixado_original = p_rebaixado[times_interesse],
-  p_rebaixado_com_h = p_rebaixado_h[times_interesse]
-) %&gt;% arrange(desc(p_campeao_original))
+data.frame(
+  time = times_campeao,
+  p_campeao_original = p_campeao[times_campeao],
+  p_campeao_com_h = p_campeao_h[times_campeao]
+) %&gt;% arrange(desc(p_campeao_original))</code></pre>
+<pre><code>##                      time p_campeao_original p_campeao_com_h
+## Flamengo         Flamengo             0.5456          0.5186
+## Palmeiras       Palmeiras             0.4339          0.4623
+## Athletico-PR Athletico-PR             0.0129          0.0121
+## Fluminense     Fluminense             0.0063          0.0056
+## Bahia               Bahia             0.0010          0.0009
+## Cruzeiro         Cruzeiro             0.0002          0.0003</code></pre>
+<p>E para os times com maior chance de rebaixamento (pergunta 2, modelo
+original):</p>
+<pre class="r"><code>times_rebaixado &lt;- names(sort(p_rebaixado, decreasing = TRUE))[1:6]
 
-comparacao_h</code></pre>
-<pre><code>##                        time p_campeao_original p_campeao_com_h
-## Flamengo           Flamengo             0.5456          0.5186
-## Palmeiras         Palmeiras             0.4339          0.4623
-## Athletico-PR   Athletico-PR             0.0129          0.0121
-## Fluminense       Fluminense             0.0063          0.0056
-## Bahia                 Bahia             0.0010          0.0009
-## Cruzeiro           Cruzeiro             0.0002          0.0003
-## Chapecoense     Chapecoense             0.0000          0.0000
-## Remo                   Remo             0.0000          0.0000
-## Internacional Internacional             0.0000          0.0000
-## Vitória             Vitória             0.0000          0.0000
-## Mirassol           Mirassol             0.0000          0.0000
-## Grêmio               Grêmio             0.0000          0.0000
-##               p_rebaixado_original p_rebaixado_com_h
-## Flamengo                    0.0000            0.0000
-## Palmeiras                   0.0000            0.0000
-## Athletico-PR                0.0000            0.0000
-## Fluminense                  0.0000            0.0000
-## Bahia                       0.0000            0.0000
-## Cruzeiro                    0.0000            0.0000
-## Chapecoense                 0.9969            0.9965
-## Remo                        0.9553            0.9535
-## Internacional               0.5852            0.5848
-## Vitória                     0.4977            0.4910
-## Mirassol                    0.3736            0.3929
-## Grêmio                      0.2466            0.2308</code></pre>
+data.frame(
+  time = times_rebaixado,
+  p_rebaixado_original = p_rebaixado[times_rebaixado],
+  p_rebaixado_com_h = p_rebaixado_h[times_rebaixado]
+) %&gt;% arrange(desc(p_rebaixado_original))</code></pre>
+<pre><code>##                        time p_rebaixado_original p_rebaixado_com_h
+## Chapecoense     Chapecoense               0.9969            0.9965
+## Remo                   Remo               0.9553            0.9535
+## Internacional Internacional               0.5852            0.5848
+## Vitória             Vitória               0.4977            0.4910
+## Mirassol           Mirassol               0.3736            0.3929
+## Grêmio               Grêmio               0.2466            0.2308</code></pre>
 <p>O efeito é pequeno, mas sistemático, e vem do calendário de jogos que
 faltam, não de um viés geral do fator <span class="math inline">\(h\)</span>: como <span class="math inline">\(h\)</span> só altera o resultado de cada jogo
 individual (mais gols para quem joga em casa, menos para o visitante),
