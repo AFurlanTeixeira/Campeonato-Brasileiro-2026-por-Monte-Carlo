@@ -67,11 +67,26 @@ pergunta 3, ou reportar as duas com essa ressalva._
 
 ## 5. Pontos para ≥90% de chance de ser campeão
 
-**79 pontos.**
+Igual à pergunta 3, o enunciado admite duas leituras — e elas divergem
+nas mesmas réplicas, não é ruído de simulação:
+
+- **Leitura A** (menor pontuação que garante ≥90% empiricamente, olhando
+  todos os times em todas as posições): **79 pontos**.
+- **Leitura B** (percentil 90 da pontuação do vice-campeão): **76 pontos**.
+
+_Decisão do grupo: escolher qual é a resposta oficial da pergunta 5, ou
+reportar as duas com essa ressalva (como na pergunta 3)._
 
 ## 6. Pontos para ≥95% de chance de não ser rebaixado
 
-**45 pontos.**
+Mesma ambiguidade da pergunta 5:
+
+- **Leitura A** (menor pontuação que garante ≥95% empiricamente): **45
+  pontos**.
+- **Leitura B** (percentil 95 da pontuação do 17º colocado): **44 pontos**.
+
+_Decisão do grupo: escolher qual é a resposta oficial da pergunta 6, ou
+reportar as duas com essa ressalva._
 
 ## Classificação esperada (consolidado das 10.000 réplicas)
 
@@ -132,7 +147,17 @@ mandante. Nos jogos já disputados:
 combinam gols em casa e fora, então o modelo trata os dois lados como
 equivalentes. Uma proposta de baixo custo (discutida em `relatorio.Rmd`) é
 um fator multiplicativo único aplicado aos λ de mandante/visitante, sem
-alterar o resto do pipeline.
+alterar o resto do pipeline:
+
+```
+h = √(gols mandante médio / gols visitante médio) = √(1,51 / 1,15) ≈ 1,145
+```
+
+Com esse `h`, os λ da simulação passariam de `(theta_mandante +
+phi_visitante) / 2` e `(theta_visitante + phi_mandante) / 2` para
+`lambda_mandante * h` e `lambda_visitante / h` — a mudança fica isolada em
+`R/simulacao.R`, sem afetar `estimativas.R`, `classificacao.R` ou
+`bootstrap.R`.
 
 **Comparação com o modelo original:** _(resultados lado a lado, depois que
 o grupo decidir e implementar a melhoria)_
