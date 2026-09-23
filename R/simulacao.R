@@ -16,12 +16,16 @@
 #' @param phi_visitante taxa de gols sofridos do time visitante.
 #' @param seed semente do gerador de numeros aleatorios, passada
 #'   explicitamente para reprodutibilidade (ver `.ai/padroes-codigo.md`).
+#' @param h fator de vantagem de mandante (atividade extra, ver
+#'   `docs/relatorio.Rmd`, secao "Atividade extra"). `h = 1` (padrao)
+#'   reproduz o modelo do enunciado, sem vantagem de mandante.
 #' @return vetor nomeado `c(gols_mandante = ..., gols_visitante = ...)`.
-simular_jogo <- function(theta_mandante, phi_mandante, theta_visitante, phi_visitante, seed) {
+simular_jogo <- function(theta_mandante, phi_mandante, theta_visitante, phi_visitante,
+                         seed, h = 1) {
   set.seed(seed)
 
-  lambda_mandante <- (theta_mandante + phi_visitante) / 2
-  lambda_visitante <- (theta_visitante + phi_mandante) / 2
+  lambda_mandante <- (theta_mandante + phi_visitante) / 2 * h
+  lambda_visitante <- (theta_visitante + phi_mandante) / 2 / h
 
   c(
     gols_mandante = rpois(1, lambda_mandante),
@@ -40,9 +44,12 @@ simular_jogo <- function(theta_mandante, phi_mandante, theta_visitante, phi_visi
 #' @param parametros theta/phi por time, indexado por nome do time (saida de
 #'   `estimar_parametros()`).
 #' @param seed semente do gerador de numeros aleatorios.
+#' @param h fator de vantagem de mandante (atividade extra, ver
+#'   `docs/relatorio.Rmd`, secao "Atividade extra"). `h = 1` (padrao)
+#'   reproduz o modelo do enunciado, sem vantagem de mandante.
 #' @return copia de `jogos_pendentes` com `gols_mandante`/`gols_visitante`
 #'   preenchidos com os resultados simulados.
-simular_temporada <- function(jogos_pendentes, parametros, seed) {
+simular_temporada <- function(jogos_pendentes, parametros, seed, h = 1) {
   set.seed(seed)
 
   theta_mandante <- parametros[jogos_pendentes$time_mandante, "theta"]
@@ -50,8 +57,8 @@ simular_temporada <- function(jogos_pendentes, parametros, seed) {
   theta_visitante <- parametros[jogos_pendentes$time_visitante, "theta"]
   phi_visitante <- parametros[jogos_pendentes$time_visitante, "phi"]
 
-  lambda_mandante <- (theta_mandante + phi_visitante) / 2
-  lambda_visitante <- (theta_visitante + phi_mandante) / 2
+  lambda_mandante <- (theta_mandante + phi_visitante) / 2 * h
+  lambda_visitante <- (theta_visitante + phi_mandante) / 2 / h
 
   n <- nrow(jogos_pendentes)
   jogos_pendentes$gols_mandante <- rpois(n, lambda_mandante)

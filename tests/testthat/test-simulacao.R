@@ -69,3 +69,53 @@ test_that("simular_temporada e reprodutivel com a mesma seed", {
 
   expect_equal(sim1, sim2)
 })
+
+test_that("h = 1 reproduz o modelo do enunciado, sem vantagem de mandante", {
+  placar_padrao <- simular_jogo(1.5, 1.0, 1.2, 0.8, seed = 42)
+  placar_h1 <- simular_jogo(1.5, 1.0, 1.2, 0.8, seed = 42, h = 1)
+
+  expect_equal(placar_padrao, placar_h1)
+})
+
+test_that("h > 1 aumenta o lambda do mandante e reduz o do visitante (ADR-004)", {
+  theta_mandante <- 1.5
+  phi_mandante <- 1.0
+  theta_visitante <- 1.2
+  phi_visitante <- 0.8
+  h <- 1.145
+
+  lambda_mandante_esperado <- (theta_mandante + phi_visitante) / 2 * h
+  lambda_visitante_esperado <- (theta_visitante + phi_mandante) / 2 / h
+
+  gols <- vapply(1:2000, function(s) {
+    placar <- simular_jogo(
+      theta_mandante, phi_mandante, theta_visitante, phi_visitante,
+      seed = s, h = h
+    )
+    c(placar[["gols_mandante"]], placar[["gols_visitante"]])
+  }, numeric(2))
+
+  expect_equal(mean(gols[1, ]), lambda_mandante_esperado, tolerance = 0.1)
+  expect_equal(mean(gols[2, ]), lambda_visitante_esperado, tolerance = 0.1)
+})
+
+test_that("simular_temporada: h e opcional e default reproduz h = 1", {
+  parametros <- data.frame(
+    theta = c(2, 1),
+    phi = c(1, 1.5),
+    row.names = c("A", "B")
+  )
+  pendentes <- data.frame(
+    rodada = c(1, 2),
+    time_mandante = c("A", "B"),
+    gols_mandante = c(NA, NA),
+    time_visitante = c("B", "A"),
+    gols_visitante = c(NA, NA),
+    stringsAsFactors = FALSE
+  )
+
+  sem_argumento_h <- simular_temporada(pendentes, parametros, seed = 7)
+  com_h_explicito <- simular_temporada(pendentes, parametros, seed = 7, h = 1)
+
+  expect_equal(sem_argumento_h, com_h_explicito)
+})

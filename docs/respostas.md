@@ -48,8 +48,8 @@ deles está "salvo" nem "condenado".
 ## 3. Probabilidade de decisão por critério de desempate
 
 O enunciado admite duas leituras do que conta como "decidido pelo
-desempate". **Decisão do grupo: adotamos a opção (a)** — o desempate que
-decide o título — como resposta oficial.
+desempate". **Decisão do grupo: adotamos a opção (a)**: o desempate que
+decide o título como resposta oficial.
 
 - **(a) Empate no título** (1º e 2º lugares terminam com os mesmos
   pontos) — **resposta oficial**: **6,8%** das réplicas (erro MC
@@ -67,15 +67,11 @@ decide o título — como resposta oficial.
 
 ## 5. Pontos para ≥90% de chance de ser campeão
 
-Igual à pergunta 3, o enunciado admite duas leituras — e elas divergem
-nas mesmas réplicas, não é ruído de simulação:
+Igual à pergunta 3, adotamos duas leituras possíveis:
 
 - **Leitura A** (menor pontuação que garante ≥90% empiricamente, olhando
   todos os times em todas as posições): **79 pontos**.
 - **Leitura B** (percentil 90 da pontuação do vice-campeão): **76 pontos**.
-
-_Decisão do grupo: escolher qual é a resposta oficial da pergunta 5, ou
-reportar as duas com essa ressalva (como na pergunta 3)._
 
 ## 6. Pontos para ≥95% de chance de não ser rebaixado
 
@@ -84,9 +80,6 @@ Mesma ambiguidade da pergunta 5:
 - **Leitura A** (menor pontuação que garante ≥95% empiricamente): **45
   pontos**.
 - **Leitura B** (percentil 95 da pontuação do 17º colocado): **44 pontos**.
-
-_Decisão do grupo: escolher qual é a resposta oficial da pergunta 6, ou
-reportar as duas com essa ressalva._
 
 ## Classificação esperada (consolidado das 10.000 réplicas)
 
@@ -143,7 +136,7 @@ mandante. Nos jogos já disputados:
 | Gols por jogo (média) | 1,51 | 1,15 |
 | % de vitórias | 46,4% | 25,9% |
 
-(27,7% de empates.) O mandante marca mais e vence bem mais — mas θ/ϕ
+(27,7% de empates.) O mandante marca mais e vence bem mais, mas θ/ϕ
 combinam gols em casa e fora, então o modelo trata os dois lados como
 equivalentes. Uma proposta de baixo custo (discutida em `relatorio.Rmd`) é
 um fator multiplicativo único aplicado aos λ de mandante/visitante, sem
@@ -153,11 +146,44 @@ alterar o resto do pipeline:
 h = √(gols mandante médio / gols visitante médio) = √(1,51 / 1,15) ≈ 1,145
 ```
 
-Com esse `h`, os λ da simulação passariam de `(theta_mandante +
+Com esse `h`, os λ da simulação passam de `(theta_mandante +
 phi_visitante) / 2` e `(theta_visitante + phi_mandante) / 2` para
-`lambda_mandante * h` e `lambda_visitante / h` — a mudança fica isolada em
-`R/simulacao.R`, sem afetar `estimativas.R`, `classificacao.R` ou
-`bootstrap.R`.
+`lambda_mandante * h` e `lambda_visitante / h`. **Implementado** como o
+argumento opcional `h` de `simular_jogo()`/`simular_temporada()`
+(`R/simulacao.R`), com `h = 1` como padrão.
 
-**Comparação com o modelo original:** _(resultados lado a lado, depois que
-o grupo decidir e implementar a melhoria)_
+**Comparação com o modelo original** (mesmo N = 10.000, mesmos seeds por
+réplica — só a simulação passa a receber `h`; código completo em
+`relatorio.Rmd`, seção "Atividade extra"):
+
+| Time | P(título) original | P(título) com h | P(rebaixamento) original | P(rebaixamento) com h |
+|---|---:|---:|---:|---:|
+| Flamengo | 54,6% | 51,9% | 0,0% | 0,0% |
+| Palmeiras | 43,4% | 46,2% | 0,0% | 0,0% |
+| Mirassol | 0,0% | 0,0% | 37,4% | 39,3% |
+| Vitória | 0,0% | 0,0% | 49,8% | 49,1% |
+| Grêmio | 0,0% | 0,0% | 24,7% | 23,1% |
+
+O efeito é pequeno mas sistemático, e vem do calendário dos jogos que
+faltam, não de um viés geral do fator: quem tem mais jogos em casa do que
+fora entre os pendentes sai ganhando (caso do Palmeiras, 6 em casa contra
+4 fora), e o oposto vale para quem tem mais jogos fora (caso do Mirassol,
+4 em casa contra 5 fora). Como o título é disputado quase só entre
+Flamengo (calendário equilibrado, 5 casa/5 fora) e Palmeiras, o ganho de
+um é a perda do outro. O valor esperado de pontos do campeão (pergunta 4)
+quase não muda: 76,5 pontos no modelo original contra 76,7 com `h`.
+
+**Outra melhoria futura, não implementada:** modelar desfalques por
+suspensão (cartões) ou lesão, o modelo atual assume elenco sempre
+completo, mas θ/ϕ (médias sobre os jogos já disputados) não capturam a
+perda pontual de um jogador-chave. Uma versão mais simples da mesma
+ideia, sem precisar de lista de desfalque jogador a jogador: classificar
+cada jogo já disputado em "time titular completo" ou "misto/reserva"
+(comum quando o time também disputa copa nacional/continental e poupa
+titulares em jogos considerados menos decisivos) e comparar
+vitórias/derrotas e gols marcados/sofridos entre as duas situações;
+times com diferença grande teriam um θ/ϕ por situação, em vez de um
+valor único. Nos dois casos, implementar isso exigiria uma fonte de
+dados que o CSV atual não tem (escalação ou lista de desfalques por
+rodada) e uma forma de traduzir isso em ajuste de λ fica em aberto para
+uma versão futura do modelo, condicionada a essa fonte de dados.
