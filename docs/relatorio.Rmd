@@ -198,10 +198,12 @@ limite superior mais honesto é $3/N$ (regra de três para zero eventos em
 
 # Pergunta 3 — Probabilidade de decisão por critério de desempate
 
-**Ambiguidade a resolver no texto final:** "decidido pelos critérios de
-desempate" pode significar (a) o título saiu empatado em pontos no topo, ou
-(b) *alguma* posição relevante (título ou última vaga de rebaixamento) saiu
-empatada em pontos. São leituras diferentes e merecem números separados.
+"Decidido pelos critérios de desempate" pode significar (a) o título saiu
+empatado em pontos no topo, ou (b) *alguma* posição relevante (título ou
+última vaga de rebaixamento) saiu empatada em pontos. **Decisão do grupo:**
+adotamos a leitura (a) — a pergunta se refere ao desempate que decide o
+título — como resposta oficial; a leitura (b) fica calculada abaixo só como
+referência.
 
 ```{r q3-desempate}
 p_empate_topo <- mean(empate_topo)
@@ -211,11 +213,14 @@ empate_16_17 <- posicoes_ordenadas_por_pontos[, 16] == posicoes_ordenadas_por_po
 p_empate_rebaixamento <- mean(empate_16_17)
 
 data.frame(
-  interpretacao = c("Empate no título (posição 1)", "Empate na última vaga de rebaixamento (16º-17º)"),
+  interpretacao = c("Empate no título (posição 1) — resposta oficial (a)", "Empate na última vaga de rebaixamento (16º-17º) — referência (b)"),
   probabilidade = c(p_empate_topo, p_empate_rebaixamento),
   erro_mc = erro_mc(c(p_empate_topo, p_empate_rebaixamento), N)
 )
 ```
+
+A probabilidade de o título ser decidido pelos critérios de desempate é
+**`r round(p_empate_topo * 100, 1)`%** (erro MC ±`r round(erro_mc(p_empate_topo, N) * 100, 2)` p.p.).
 
 # Pergunta 4 — Valor esperado de pontos do campeão
 
@@ -239,7 +244,7 @@ diferentes e não devem ser confundidas no texto final.
 # Pergunta 5 — Pontos para ≥90% de chance de título
 
 Assim como na pergunta 3, há duas leituras razoáveis e elas dão respostas
-**diferentes nas mesmas réplicas** (não é ruído de simulação) — reportamos
+**diferentes nas mesmas réplicas** (não é ruído de simulação), reportamos
 as duas.
 
 ## Leitura A — menor pontuação que garante ≥90% empiricamente
@@ -284,9 +289,7 @@ cat("Leitura B — percentil 90 da pontuação do vice-campeão:", pontos_90_tit
 
 As duas leituras dão respostas próximas, mas diferentes
 (`r pontos_90_titulo_a` vs. `r pontos_90_titulo_b` pontos), porque
-respondem perguntas ligeiramente distintas. **Decisão do grupo:** escolher
-qual é a resposta oficial da pergunta 5, ou reportar as duas com essa
-ressalva.
+respondem perguntas ligeiramente distintas.
 
 # Pergunta 6 — Pontos para ≥95% de chance de escapar do rebaixamento
 
@@ -319,9 +322,6 @@ pontos_95_permanencia_b <- as.numeric(quantile(pontos_17, 0.95))
 cat("Leitura B — percentil 95 da pontuação do 17º colocado:", pontos_95_permanencia_b, "\n")
 ```
 
-Mesma decisão pendente da pergunta 5: qual leitura
-(`r pontos_95_permanencia_a` vs. `r pontos_95_permanencia_b` pontos) é a
-resposta oficial da pergunta 6.
 
 # Variabilidade das estimativas: bootstrap de $\theta$ e $\phi$
 

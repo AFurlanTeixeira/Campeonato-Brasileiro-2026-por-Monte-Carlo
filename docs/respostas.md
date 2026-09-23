@@ -47,16 +47,16 @@ deles está "salvo" nem "condenado".
 
 ## 3. Probabilidade de decisão por critério de desempate
 
-O enunciado é ambíguo sobre o que conta como "decidido pelo desempate" —
-calculamos as duas leituras possíveis:
+O enunciado admite duas leituras do que conta como "decidido pelo
+desempate". **Decisão do grupo: adotamos a opção (a)** — o desempate que
+decide o título — como resposta oficial.
 
-- **Empate no título** (1º e 2º lugares terminam com os mesmos pontos):
-  **6,8%** das réplicas (erro MC ±0,25 p.p.).
-- **Empate na última vaga de rebaixamento** (16º e 17º lugares com os
-  mesmos pontos): **20,0%** das réplicas (erro MC ±0,4 p.p.).
-
-_Decisão do grupo: escolher qual das duas leituras é a resposta oficial da
-pergunta 3, ou reportar as duas com essa ressalva._
+- **(a) Empate no título** (1º e 2º lugares terminam com os mesmos
+  pontos) — **resposta oficial**: **6,8%** das réplicas (erro MC
+  ±0,25 p.p.).
+- (b) Empate na última vaga de rebaixamento (16º e 17º lugares com os
+  mesmos pontos) — mantido como referência, não é a resposta adotada:
+  20,0% das réplicas (erro MC ±0,4 p.p.).
 
 ## 4. Valor esperado de pontos do campeão
 
