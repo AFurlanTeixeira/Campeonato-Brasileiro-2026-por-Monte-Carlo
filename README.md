@@ -177,8 +177,8 @@ A pasta `.ai/` contém os arquivos de contexto e diretrizes do projeto para uso 
 
 [x] Intervalos de confiança via bootstrap + gráfico
 
-[ ] Atividade extra (melhoria do modelo, justificada e comparada)
+[x] Atividade extra (melhoria do modelo, justificada e comparada)
 
-[ ] Relatório final com código e texto explicativo
+[x] Relatório final com código e texto explicativo
  
 
